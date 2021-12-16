@@ -1,0 +1,11 @@
+*{
+    margin: 0 !important;
+    padding: 0 !important;
+}
+body{
+    background-color: antiquewhite;
+}
+
+.sep{
+    display: hidden;
+}
