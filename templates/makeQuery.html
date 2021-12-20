@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+
+{% block content%}
+ 
+<div class="container-fluid">
+
+    <div class="container">
+
+        <div class="row">
+            <div class="col-2"></div>
+            <div class="col-8 mt-4 pq-box">
+
+                <div class="text-center mb-3">
+                    <h5>Use the current model for prediction </h5>
+                </div>
+
+                <form class="mt-2 mb-2" action="{{ url_for('make_query') }}" method="POST">
+
+                    <div class="form-group row mb-3">
+                        <label for="type" class="col-sm-3 col-form-label col-form-label-sm">Type</label>
+                        <div class="col-sm-9">
+                            <input name='type' type="text" class="form-control form-control-sm" id="type" placeholder="transaction type">
+                        </div>
+                    </div>
+                    
+                    <div class="form-group row mb-3">
+                        <label for="amount" class="col-sm-3 col-form-label col-form-label-sm">Amount</label>
+                        <div class="col-sm-9">
+                            <input name='amount' type="text" class="form-control form-control-sm" id="amount" placeholder="transaction amount">
+                        </div>
+                    </div>
+
+                    <div class="form-group row mb-3">
+                        <label for="oldBalanceOrig" class="col-sm-3 col-form-label col-form-label-sm">OldBalanceOrig</label>
+                        <div class="col-sm-9">
+                            <input name='oldBalanceOrig' type="text" class="form-control form-control-sm" id="oldBalanceOrig" placeholder="oldBalanceOrig">
+                        </div>
+                    </div>
+
+                    <div class="form-group row mb-3">
+                        <label for="newBalanceOrig" class="col-sm-3 col-form-label col-form-label-sm">newBalanceOrig</label>
+                        <div class="col-sm-9">
+                            <input name='newBalanceOrig' type="text" class="form-control form-control-sm" id="newBalanceOrig" placeholder="newBalanceOrig">
+                        </div>
+                    </div>
+
+                    <div class="form-group row mb-3">
+                        <label for="oldBalancedest" class="col-sm-3 col-form-label col-form-label-sm">oldBalancedest</label>
+                        <div class="col-sm-9">
+                            <input name='oldBalancedest' type="text" class="form-control form-control-sm" id="oldBalancedest" placeholder="oldBalancedest">
+                        </div>
+                    </div>
+
+                    <div class="form-group row mb-3">
+                        <label for="newBalancedest" class="col-sm-3 col-form-label col-form-label-sm">newBalancedest</label>
+                        <div class="col-sm-9">
+                            <input name='newBalancedest' type="text" class="form-control form-control-sm" id="newBalancedest" placeholder="newBalancedest">
+                        </div>
+                    </div>
+                    
+                    <div class="text-center">
+                        <button class="btn btn-primary">Submit</button>
+                    </div>
+
+                </form>
+
+                {% if pred == 'Fraud' %}
+                    <h4>This transaction is fraudulent</h4>
+                {% elif pred == 'Non-Fraud' %}
+                    <h4>This transaction is not fraudulent</h4>
+                {% endif %}
+
+            </div>
+            <div class="col-2"></div>
+        </div>
+    </div>
+</div>      
+
+{% endblock %}

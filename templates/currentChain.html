@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+
+{% block content%}
+    <div class="container">
+        <div class="col-sm-8 mt-4">
+            <h5>Current Blockchain </h5>
+            <form action="{{url_for('print_blockchain')}}" class="mb-1">
+                <button class="btn btn-outline-info">Print Current Chain</button>
+            </form>
+        
+            {% for block in current_chain  %}
+                <div>
+                        Block No : {{block['block_no']}} <br>
+                        Block Hash : {{block['block_hash']}} <br> 
+                        Previous Hash : {{block['previous_hash']}} <br>
+                        Nonce : {{block['nonce']}} <br>
+                        Data : {{block['data']}} <br>
+                        ---------------------------------------------------------- <br>
+                </div>
+            {% endfor %}
+        
+        </div>
+    </div>    
+
+{% endblock %}
+
