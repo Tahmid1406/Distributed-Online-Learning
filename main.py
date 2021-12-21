@@ -13,7 +13,7 @@ from numpy import *
 import random
 import matplotlib.pyplot as plt
 import seaborn as sns
-
+from imblearn.over_sampling import SMOTE
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import classification_report, accuracy_score, roc_auc_score # import accuracy metrics
 from sklearn.naive_bayes import MultinomialNB
@@ -24,6 +24,7 @@ from sklearn.metrics import confusion_matrix
 import pickle
 import warnings
 warnings.filterwarnings("ignore")
+from sklearn.metrics import precision_recall_fscore_support as score
 
 
 
@@ -33,12 +34,19 @@ app = Flask(__name__)
 app.secret_key = os.urandom(24)
 
 
-MODEL = pickle.load(open('Models/DSLModel_1.pkl', 'rb'))
+MODEL = pickle.load(open('model/DSLModel_1.pkl', 'rb'))
 
 MODEL_tweak = MODEL
 
 USER_DIR = 'users/'
-MODEL_DIR = 'static/models/'
+MODEL_DIR = 'model/'
+DATA_DIR = 'data/'
+
+# global variables for ML model
+
+
+
+
 
 def updatehash(*args):
     hashing_text = ""; h = sha256()
@@ -92,18 +100,79 @@ def index():
 
 @app.route('/initialTraining', methods=['POST', 'GET'])
 def initialTraining():
-    fileno = len(os.listdir(MODEL_DIR))
+    fileno = len(os.listdir(DATA_DIR))
     if request.method == 'POST':
         trainFile = request.files['trainFile']
         testFile = request.files['testFile'] 
         
-        train_filepath = os.path.join(MODEL_DIR, "train.csv")
-        test_filepath = os.path.join(MODEL_DIR, "test.csv")
+        train_filepath = os.path.join(DATA_DIR, "train.csv")
+        test_filepath = os.path.join(DATA_DIR, "test.csv")
         
         trainFile.save(train_filepath)
         testFile.save(test_filepath)
+        
+        train = pd.read_csv('data/train.csv')
+        test = pd.read_csv('./data/test.csv')
+
+        X_train = train.drop('isFraud', axis=1)
+        y_train = train.isFraud
+
+        X_test = test.drop('isFraud', axis=1)
+        y_test = test.isFraud
+
+        X_train_resampled, y_train_resampled = SMOTE().fit_resample(X_train, y_train) 
+
+        X_test_resampled, y_test_resampled = SMOTE().fit_resample(X_test, y_test) 
+
+        sgd_model_resampled = SGDClassifier(loss="perceptron", eta0=0.00001, learning_rate="constant", penalty=None)
+
+        sgd_model_resampled.fit(X_train_resampled, y_train_resampled)
+        
+        perceptron_train_preds = sgd_model_resampled.predict(X_train_resampled)
+        perceptron_test_preds = sgd_model_resampled.predict(X_test_resampled)
+
+        train_accuracy = roc_auc_score(y_train_resampled, perceptron_train_preds)
+        
+        test_accuracy = roc_auc_score(y_test_resampled, perceptron_test_preds)
+        TEST_ACCURACY = test_accuracy
+        precision,recall,fscore,support=score(y_test_resampled,perceptron_test_preds,average='macro')
+        cf_matrix = confusion_matrix(y_test_resampled, perceptron_test_preds)
+        CM = cf_matrix
+        TN = CM[0][0]
+        FN = CM[1][0]
+        TP = CM[1][1]
+        FP = CM[0][1]
+
+        tpr = TP/(TP+FN)
+        TPR = tpr
+        
+        tnr = TN/(TN+FP) 
+        TNR = tnr
+
+        ppv = TP/(TP+FP)
+        PPV = ppv
+        
+        npv = TN/(TN+FN)
+        NPV = npv
+
+        fpr = FP/(FP+TN)
+        FPR = fpr
+        
+        fnr = FN/(TP+FN)
+        FNR = fnr
+
+        fdr = FP/(TP+FP)
+        FDR = fdr
+
+        acc = (TP+TN)/(TP+FP+FN+TN)
+        ACC = acc
+        print(train_accuracy)
+        print(test_accuracy)
+        print(precision)
+        print(recall)
+
     return render_template('initialTraining.html', user= g.user, role=g.role)
-    
+
 
 @app.route('/dashboard', methods=['POST', 'GET'])
 def dashboard():
