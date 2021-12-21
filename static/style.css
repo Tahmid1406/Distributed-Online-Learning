@@ -60,3 +60,24 @@ div.box-holder{
 .welcome{
     margin-top: 100px;
 }
+
+.username{
+    color: rgb(10, 70, 10);
+    font-size: small;
+    font-weight: 500;
+}
+
+select{
+    display: inline !important;
+    padding: 5px  !important;
+}
+
+.role{
+    margin-left: 15px;
+}
+
+.show-less{
+    width: 20ch;
+    overflow: hidden;
+    white-space: nowrap;
+}
