@@ -25,6 +25,7 @@ import pickle
 import warnings
 warnings.filterwarnings("ignore")
 from sklearn.metrics import precision_recall_fscore_support as score
+from sklearn.model_selection import learning_curve
 
 
 
@@ -127,6 +128,27 @@ def initialTraining():
 
             sgd_model_resampled.fit(X_train_resampled, y_train_resampled)
             
+
+            train_sizes_acc, train_scores_acc, test_scores_acc = learning_curve(sgd_model_resampled, 
+                                                    X_train_resampled, 
+                                                    y_train_resampled, 
+                                                    scoring='recall', 
+                                                    n_jobs=1, 
+                                                    cv=5,
+                                                    train_sizes=linspace(0.1, 1, 5),
+                                                    verbose=1)
+
+            train_mean_acc = np.mean(train_scores_acc, axis=1)
+            test_mean_acc = np.mean(test_scores_acc, axis=1)
+
+            plt.plot(train_sizes_acc, train_mean_acc, label='Training Scores')
+            plt.plot(train_mean_acc, test_mean_acc, label='Test Scores')
+            plt.title("Learning curves for training and testing datasets")
+            plt.xlabel("Trainig Size")
+            plt.ylabel("Accuracy Score")
+            plt.legend(loc='best')
+            plt.savefig('static/initial.png')
+
             perceptron_train_preds = sgd_model_resampled.predict(X_train_resampled)
             perceptron_test_preds = sgd_model_resampled.predict(X_test_resampled)
 
@@ -134,6 +156,7 @@ def initialTraining():
             
             test_accuracy = roc_auc_score(y_test_resampled, perceptron_test_preds)
             
+
 
             precision,recall,fscore,support=score(y_test_resampled,perceptron_test_preds,average='macro')
 
@@ -254,7 +277,16 @@ def train():
 @app.route('/metrics' , methods=['POST', 'GET'])
 def view_metrics():
 
-    return render_template('metrics.html')
+    files = sorted(os.listdir(METRIC_DIR), key=lambda x : int(x))
+    
+    results = []
+
+    for file in files[0:]:
+        with open(METRIC_DIR + file) as f:
+            metric = json.load(f)
+        results.append(metric)
+
+    return render_template('metrics.html', metric_list = results)
 
 
 

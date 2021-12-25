@@ -3,7 +3,17 @@
 {% block content%}
     <div class="container">
         <div class="row">
-            This is the metrics page
+            <div class="col-md-1"></div>
+            <div class="col-md-10">
+                {% for metric in metric_list  %}
+                    <div>
+                            Training Accuracy : {{metric['taining_accuracy']}} <br>
+                           
+                            ---------------------------------------------------------- <br>
+                    </div>
+                {% endfor %}
+            </div>
+            <div class="col-md-1"></div>
         </div>
     </div>    
 
