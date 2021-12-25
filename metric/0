@@ -1,0 +1,16 @@
+{
+    "taining_accuracy": 0.9345480663492374,
+    "testing_accuracy": 0.9353435491843796,
+    "overall_accuracy": 0.9353435491843797,
+    "precision": 0.9360300187897057,
+    "recall": 0.9353435491843796,
+    "f1score": 0.935318090980447,
+    "support": null,
+    "true_positive_rate": 0.955182671999281,
+    "true_negative_rate": 0.9155044263694783,
+    "positive_predictive_value": 0.9187291126022002,
+    "negative_predictive_value": 0.9533309249772111,
+    "false_positive_rate": 0.08449557363052172,
+    "false_negative_rate": 0.044817328000719005,
+    "failure_detection_rate": 0.0812708873977998
+}

@@ -11,10 +11,15 @@
 
                     <p>Your UserID :  <span class="username"> {{user}} </span> </p>
                     <p>Your Role : <span class="username"> {{role}} </p>
+
                     {% if role == 'Regulator' %}
                         <p class="text-success"> You can initiate the model training </p>
                     {% else %}
-                    <p class="text-danger"> You can not initiate the model training </p>
+                        <p class="text-danger"> You can not initiate the model training </p>
+                    {% endif %}
+
+                    {% if training_text == 'False' %}
+                        <p class="text-danger"> The initial model has already been trained. You can still contribute to the model development. </p>
                     {% endif %}
 
                 </div>
@@ -34,18 +39,24 @@
                             <input class="form-control mb-4" id="test" type="file" name="testFile" value="Test Set">
                         </div>
                     </div>
-
                     
+                    {% if training_text == 'False' %}
+                        <input type="submit" name="" value="Train InitialModel" class="btn btn-primary disabled">
+                    {% else %}
+                        <input type="submit" name="" value="Train Initial Model" class="btn btn-primary">
+                    {% endif %}
                     
-                    <input type="submit" name="" value="Train Model" class="btn btn-primary">
                     
                 </form>
+                
             </div>
+
+            
+
             <div class="col-md-2"></div>
-            {% if tr_a %}
-                Training Accuracy: {{ tr_a }}
-                Testing Accuracy : {{ ts_a }}
-            {% endif %}
+            
+            
+            
             
         </div>
     </div>    

@@ -41,11 +41,7 @@ MODEL_tweak = MODEL
 USER_DIR = 'users/'
 MODEL_DIR = 'model/'
 DATA_DIR = 'data/'
-
-# global variables for ML model
-
-
-
+METRIC_DIR = 'metric/'
 
 
 def updatehash(*args):
@@ -91,8 +87,6 @@ def make_query():
 
     return render_template('makeQuery.html', pred=prediction)
 
-
-
 @app.route('/', methods=['POST', 'GET'])
 def index():
     return render_template('index.html', user= g.user, role=g.role)
@@ -100,78 +94,91 @@ def index():
 
 @app.route('/initialTraining', methods=['POST', 'GET'])
 def initialTraining():
-    fileno = len(os.listdir(DATA_DIR))
+
+    model_no = len(os.listdir(METRIC_DIR))
+    text = 'True'
+    
     if request.method == 'POST':
-        trainFile = request.files['trainFile']
-        testFile = request.files['testFile'] 
-        
-        train_filepath = os.path.join(DATA_DIR, "train.csv")
-        test_filepath = os.path.join(DATA_DIR, "test.csv")
-        
-        trainFile.save(train_filepath)
-        testFile.save(test_filepath)
-        
-        train = pd.read_csv('data/train.csv')
-        test = pd.read_csv('./data/test.csv')
+        if model_no == 0:
+            text = 'True'
+            trainFile = request.files['trainFile']
+            testFile = request.files['testFile'] 
+            
+            train_filepath = os.path.join(DATA_DIR, "train.csv")
+            test_filepath = os.path.join(DATA_DIR, "test.csv")
+            
+            trainFile.save(train_filepath)
+            testFile.save(test_filepath)
+            
+            train = pd.read_csv('data/train.csv')
+            test = pd.read_csv('./data/test.csv')
 
-        X_train = train.drop('isFraud', axis=1)
-        y_train = train.isFraud
+            X_train = train.drop('isFraud', axis=1)
+            y_train = train.isFraud
 
-        X_test = test.drop('isFraud', axis=1)
-        y_test = test.isFraud
+            X_test = test.drop('isFraud', axis=1)
+            y_test = test.isFraud
 
-        X_train_resampled, y_train_resampled = SMOTE().fit_resample(X_train, y_train) 
+            X_train_resampled, y_train_resampled = SMOTE().fit_resample(X_train, y_train) 
 
-        X_test_resampled, y_test_resampled = SMOTE().fit_resample(X_test, y_test) 
+            X_test_resampled, y_test_resampled = SMOTE().fit_resample(X_test, y_test) 
 
-        sgd_model_resampled = SGDClassifier(loss="perceptron", eta0=0.00001, learning_rate="constant", penalty=None)
+            sgd_model_resampled = SGDClassifier(loss="perceptron", eta0=0.00001, learning_rate="constant", penalty=None)
 
-        sgd_model_resampled.fit(X_train_resampled, y_train_resampled)
-        
-        perceptron_train_preds = sgd_model_resampled.predict(X_train_resampled)
-        perceptron_test_preds = sgd_model_resampled.predict(X_test_resampled)
+            sgd_model_resampled.fit(X_train_resampled, y_train_resampled)
+            
+            perceptron_train_preds = sgd_model_resampled.predict(X_train_resampled)
+            perceptron_test_preds = sgd_model_resampled.predict(X_test_resampled)
 
-        train_accuracy = roc_auc_score(y_train_resampled, perceptron_train_preds)
-        
-        test_accuracy = roc_auc_score(y_test_resampled, perceptron_test_preds)
-        TEST_ACCURACY = test_accuracy
-        precision,recall,fscore,support=score(y_test_resampled,perceptron_test_preds,average='macro')
-        cf_matrix = confusion_matrix(y_test_resampled, perceptron_test_preds)
-        CM = cf_matrix
-        TN = CM[0][0]
-        FN = CM[1][0]
-        TP = CM[1][1]
-        FP = CM[0][1]
+            train_accuracy = roc_auc_score(y_train_resampled, perceptron_train_preds)
+            
+            test_accuracy = roc_auc_score(y_test_resampled, perceptron_test_preds)
+            
 
-        tpr = TP/(TP+FN)
-        TPR = tpr
-        
-        tnr = TN/(TN+FP) 
-        TNR = tnr
+            precision,recall,fscore,support=score(y_test_resampled,perceptron_test_preds,average='macro')
 
-        ppv = TP/(TP+FP)
-        PPV = ppv
-        
-        npv = TN/(TN+FN)
-        NPV = npv
+            cf_matrix = confusion_matrix(y_test_resampled, perceptron_test_preds)
+            CM = cf_matrix
+            TN = CM[0][0]
+            FN = CM[1][0]
+            TP = CM[1][1]
+            FP = CM[0][1]
 
-        fpr = FP/(FP+TN)
-        FPR = fpr
-        
-        fnr = FN/(TP+FN)
-        FNR = fnr
+            tpr = TP/(TP+FN)
+            tnr = TN/(TN+FP) 
+            ppv = TP/(TP+FP)
+            npv = TN/(TN+FN)
+            fpr = FP/(FP+TN)
+            fnr = FN/(TP+FN)
+            fdr = FP/(TP+FP)
 
-        fdr = FP/(TP+FP)
-        FDR = fdr
+            acc = (TP+TN)/(TP+FP+FN+TN)
 
-        acc = (TP+TN)/(TP+FP+FN+TN)
-        ACC = acc
-        print(train_accuracy)
-        print(test_accuracy)
-        print(precision)
-        print(recall)
+            data = {
+                'taining_accuracy' : train_accuracy,
+                'testing_accuracy': test_accuracy,
+                'overall_accuracy' : acc,
+                'precision': precision,
+                'recall' : recall, 
+                'f1score': fscore,
+                'support': support, 
+                'true_positive_rate': tpr, 
+                'true_negative_rate': tnr,  
+                'positive_predictive_value' : ppv, 
+                'negative_predictive_value': npv,
+                'false_positive_rate': fpr,
+                'false_negative_rate' : fnr, 
+                'failure_detection_rate': fdr, 
 
-    return render_template('initialTraining.html', user= g.user, role=g.role)
+            }
+
+            with open(METRIC_DIR +  str(model_no), 'w') as f:
+                json.dump(data, f, indent=4, ensure_ascii=False)
+                f.write('\n')
+        else:
+            text = "False"
+
+    return render_template('initialTraining.html', user= g.user, role=g.role, training_text = text)
 
 
 @app.route('/dashboard', methods=['POST', 'GET'])
@@ -246,7 +253,7 @@ def train():
 
 @app.route('/metrics' , methods=['POST', 'GET'])
 def view_metrics():
-    
+
     return render_template('metrics.html')
 
 
@@ -272,6 +279,7 @@ def print_blockchain():
 
 
     return render_template('currentChain.html', current_chain = results)
+
 
 @app.before_request
 def before_request():

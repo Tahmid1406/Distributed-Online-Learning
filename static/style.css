@@ -29,6 +29,9 @@ div.box-holder{
     text-decoration: none;
 }
 
+.dash-con{
+    margin-top: 50px;
+}
 .box{
     height: 180px;
     width: 350px;
@@ -37,6 +40,11 @@ div.box-holder{
     display: flex;
     justify-content: center;
     align-items: center;
+    box-sizing: border-box;
+    border-radius: 20px;
+}
+.box:hover{
+    background-color: rgb(185, 219, 210);
 }
 
 .box a{
