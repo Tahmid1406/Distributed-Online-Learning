@@ -7,9 +7,17 @@
             <div class="col-md-10">
                 {% for metric in metric_list  %}
                     <div>
-                            Training Accuracy : {{metric['taining_accuracy']}} <br>
-                           
-                            ---------------------------------------------------------- <br>
+                        Training Accuracy : {{metric['taining_accuracy']}} <br>
+                        Testing Accuracy : {{metric['testing_accuracy']}} <br>
+                        Overall Accuracy : {{metric['overall_accuracy']}} <br>
+                        Precision : {{metric['precision']}} <br>
+                        Recall : {{metric['recall']}} <br>
+                        F1Score : {{metric['f1score']}} <br>
+                        True Positive Rate : {{metric['true_positive_rate']}} <br>
+                        True Negative Rate : {{metric['true_negative_rate']}} <br>
+                        False Positive Rate : {{metric['false_positive_rate']}} <br>
+                        False Negative Rate : {{metric['false_negative_rate']}} <br>
+                                                       
                     </div>
                 {% endfor %}
             </div>

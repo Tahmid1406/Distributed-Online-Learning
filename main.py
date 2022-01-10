@@ -15,7 +15,7 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 from imblearn.over_sampling import SMOTE
 from sklearn.model_selection import train_test_split
-from sklearn.metrics import classification_report, accuracy_score, roc_auc_score # import accuracy metrics
+from sklearn.metrics import classification_report, accuracy_score, roc_auc_score,fbeta_score # import accuracy metrics
 from sklearn.naive_bayes import MultinomialNB
 from sklearn.naive_bayes import BernoulliNB
 from sklearn.linear_model import SGDClassifier
@@ -34,15 +34,23 @@ app = Flask(__name__)
 
 app.secret_key = os.urandom(24)
 
-
-MODEL = pickle.load(open('model/DSLModel_1.pkl', 'rb'))
-
-MODEL_tweak = MODEL
-
 USER_DIR = 'users/'
 MODEL_DIR = 'model/'
 DATA_DIR = 'data/'
+INC_DATA_DIR = 'incremental/'
 METRIC_DIR = 'metric/'
+BEST_METRIC_DIR = 'bestMetric/'
+
+model_no = len(os.listdir(METRIC_DIR))
+
+
+# Global values for metric
+BEST_PRECISION = 0
+BEST_RECALL = 0
+BEST_FSCORE = 0
+BEST_FBETA = 0
+BEST_FNR = 0
+
 
 
 def updatehash(*args):
@@ -79,7 +87,10 @@ def make_query():
             float(newBalancedest)
             ])
             ]
-        result = MODEL.predict(data)
+        
+        CURRENT_MODEL = pickle.load(open(MODEL_DIR + 'model' + str(model_no + 1) + '.pkl', 'rb'))
+
+        result = CURRENT_MODEL.predict(data)
 
         if result == [1]:
             prediction = "Fraud"
@@ -87,6 +98,8 @@ def make_query():
             prediction = "Non-Fraud"
 
     return render_template('makeQuery.html', pred=prediction)
+
+
 
 @app.route('/', methods=['POST', 'GET'])
 def index():
@@ -124,33 +137,33 @@ def initialTraining():
 
             X_test_resampled, y_test_resampled = SMOTE().fit_resample(X_test, y_test) 
 
-            sgd_model_resampled = SGDClassifier(loss="perceptron", eta0=0.00001, learning_rate="constant", penalty=None)
+            perceptron_model_resampled = SGDClassifier(loss="perceptron", eta0=0.00001, learning_rate="constant", penalty=None)
 
-            sgd_model_resampled.fit(X_train_resampled, y_train_resampled)
+            perceptron_model_resampled.fit(X_train_resampled, y_train_resampled)
             
 
-            train_sizes_acc, train_scores_acc, test_scores_acc = learning_curve(sgd_model_resampled, 
-                                                    X_train_resampled, 
-                                                    y_train_resampled, 
-                                                    scoring='recall', 
-                                                    n_jobs=1, 
-                                                    cv=5,
-                                                    train_sizes=linspace(0.1, 1, 5),
-                                                    verbose=1)
+            # train_sizes_acc, train_scores_acc, test_scores_acc = learning_curve(sgd_model_resampled, 
+            #                                         X_train_resampled, 
+            #                                         y_train_resampled, 
+            #                                         scoring='recall', 
+            #                                         n_jobs=1, 
+            #                                         cv=5,
+            #                                         train_sizes=linspace(0.1, 1, 5),
+            #                                         verbose=1)
 
-            train_mean_acc = np.mean(train_scores_acc, axis=1)
-            test_mean_acc = np.mean(test_scores_acc, axis=1)
+            # train_mean_acc = np.mean(train_scores_acc, axis=1)
+            # test_mean_acc = np.mean(test_scores_acc, axis=1)
 
-            plt.plot(train_sizes_acc, train_mean_acc, label='Training Scores')
-            plt.plot(train_mean_acc, test_mean_acc, label='Test Scores')
-            plt.title("Learning curves for training and testing datasets")
-            plt.xlabel("Trainig Size")
-            plt.ylabel("Accuracy Score")
-            plt.legend(loc='best')
-            plt.savefig('static/initial.png')
+            # plt.plot(train_sizes_acc, train_mean_acc, label='Training Scores')
+            # plt.plot(train_mean_acc, test_mean_acc, label='Test Scores')
+            # plt.title("Learning curves for training and testing datasets")
+            # plt.xlabel("Trainig Size")
+            # plt.ylabel("Accuracy Score")
+            # plt.legend(loc='best')
+            # plt.savefig('static/initial.png')
 
-            perceptron_train_preds = sgd_model_resampled.predict(X_train_resampled)
-            perceptron_test_preds = sgd_model_resampled.predict(X_test_resampled)
+            perceptron_train_preds = perceptron_model_resampled.predict(X_train_resampled)
+            perceptron_test_preds = perceptron_model_resampled.predict(X_test_resampled)
 
             train_accuracy = roc_auc_score(y_train_resampled, perceptron_train_preds)
             
@@ -158,7 +171,8 @@ def initialTraining():
             
 
 
-            precision,recall,fscore,support=score(y_test_resampled,perceptron_test_preds,average='macro')
+            precision,recall,fscore,support = score(y_test_resampled,perceptron_test_preds,average='macro')
+            fbeta = fbeta_score(y_test_resampled,perceptron_test_preds, beta=5)
 
             cf_matrix = confusion_matrix(y_test_resampled, perceptron_test_preds)
             CM = cf_matrix
@@ -169,11 +183,8 @@ def initialTraining():
 
             tpr = TP/(TP+FN)
             tnr = TN/(TN+FP) 
-            ppv = TP/(TP+FP)
-            npv = TN/(TN+FN)
             fpr = FP/(FP+TN)
             fnr = FN/(TP+FN)
-            fdr = FP/(TP+FP)
 
             acc = (TP+TN)/(TP+FP+FN+TN)
 
@@ -184,29 +195,138 @@ def initialTraining():
                 'precision': precision,
                 'recall' : recall, 
                 'f1score': fscore,
-                'support': support, 
+                'fbeta': fbeta,
                 'true_positive_rate': tpr, 
                 'true_negative_rate': tnr,  
-                'positive_predictive_value' : ppv, 
-                'negative_predictive_value': npv,
                 'false_positive_rate': fpr,
                 'false_negative_rate' : fnr, 
-                'failure_detection_rate': fdr, 
-
             }
 
-            with open(METRIC_DIR +  str(model_no), 'w') as f:
+
+            # setting up the best metrics for initial model
+            global BEST_PRECISION
+            BEST_PRECISION = precision
+
+            global BEST_RECALL
+            BEST_RECALL = recall
+
+            global BEST_FSCORE
+            BEST_FSCORE = fscore
+
+            global BEST_FBETA
+            BEST_FBETA = fbeta
+
+            global BEST_FNR
+            BEST_FNR = fnr
+
+
+            pickle.dump(perceptron_model_resampled, open(MODEL_DIR + 'model' + str(model_no + 1) + '.pkl', 'wb'))
+
+            with open(METRIC_DIR +  str(model_no + 1), 'w') as f:
                 json.dump(data, f, indent=4, ensure_ascii=False)
                 f.write('\n')
+
+
         else:
             text = "False"
 
     return render_template('initialTraining.html', user= g.user, role=g.role, training_text = text)
 
 
+@app.route('/train' , methods=['POST', 'GET'])
+def train():
+    if request.method == 'POST':
+        global BEST_PRECISION
+        BEST_PRECISION = BEST_PRECISION + 1
+        
+        # files = sorted(os.listdir(BEST_METRIC_DIR), key=lambda x : int(x))
+
+        # for file in files[0:]:
+        #     with open(METRIC_DIR + file) as f:
+        #         metric = json.load(f)
+        #         print(str(metric.get('precision')))
+
+        # file = request.files['csvfile']
+
+        # file_no = len(os.listdir(INC_DATA_DIR)) 
+
+        # filepath = os.path.join(INC_DATA_DIR + str(file_no + 1) + ".csv")
+        
+        # file.save(filepath)
+
+        # workfile = pd.read_csv('incremental/' + str(file_no+1) + '.csv')
+
+        # train, test = train_test_split(workfile, test_size=0.33, random_state=42)
+
+        # X_train = train.drop('isFraud', axis=1)
+        # y_train = train.isFraud   
+
+        # X_test = test.drop('isFraud', axis=1)
+        # y_test = test.isFraud
+
+        # X_train_resampled, y_train_resampled = SMOTE().fit_resample(X_train, y_train) 
+
+        # X_test_resampled, y_test_resampled = SMOTE().fit_resample(X_test, y_test) 
+
+        # perceptron_model_resampled = pickle.load(open(MODEL_DIR + 'model' + str(model_no) + '.pkl', 'rb'))
+
+        # perceptron_model_resampled.partial_fit(X_train_resampled, y_train_resampled)
+
+        # perceptron_train_preds = perceptron_model_resampled.predict(X_train_resampled)
+        # perceptron_test_preds = perceptron_model_resampled.predict(X_test_resampled)
+
+        # train_accuracy = roc_auc_score(y_train_resampled, perceptron_train_preds)
+        
+        # test_accuracy = roc_auc_score(y_test_resampled, perceptron_test_preds)
+        
+
+
+        # precision,recall,fscore,support = score(y_test_resampled,perceptron_test_preds,average='macro')
+        # fbeta = fbeta_score(y_test_resampled,perceptron_test_preds, beta=5)
+
+        # cf_matrix = confusion_matrix(y_test_resampled, perceptron_test_preds)
+        # CM = cf_matrix
+        # TN = CM[0][0]
+        # FN = CM[1][0]
+        # TP = CM[1][1]
+        # FP = CM[0][1]
+
+        # tpr = TP/(TP+FN)
+        # tnr = TN/(TN+FP) 
+        # fpr = FP/(FP+TN)
+        # fnr = FN/(TP+FN)
+
+        # acc = (TP+TN)/(TP+FP+FN+TN)
+
+        # data = {
+        #     'taining_accuracy' : train_accuracy,
+        #     'testing_accuracy': test_accuracy,
+        #     'overall_accuracy' : acc,
+        #     'precision': precision,
+        #     'recall' : recall, 
+        #     'f1score': fscore,
+        #     'fbeta': fbeta,
+        #     'true_positive_rate': tpr, 
+        #     'true_negative_rate': tnr,  
+        #     'false_positive_rate': fpr,
+        #     'false_negative_rate' : fnr, 
+        # }
+
+        # with open(METRIC_DIR +  str(model_no + 1), 'w') as f:
+        #         json.dump(data, f, indent=4, ensure_ascii=False)
+        #         f.write('\n')
+    
+                
+    return render_template('train.html', precision = BEST_PRECISION)
+
+
+
 @app.route('/dashboard', methods=['POST', 'GET'])
 def dashboard():
-    return render_template('dashboard.html')
+
+    total_model_no = len(os.listdir(MODEL_DIR))
+
+    return render_template('dashboard.html', model_no = total_model_no)
 
 
 @app.route('/login' , methods=['POST', 'GET'])
@@ -264,14 +384,7 @@ def register():
     return render_template('register.html')
 
 
-@app.route('/train' , methods=['POST', 'GET'])
-def train():
-    if request.method == 'POST':
-        file = request.files['csvfile']
-        print(type(file))
-        
 
-    return render_template('train.html')
 
 
 @app.route('/metrics' , methods=['POST', 'GET'])

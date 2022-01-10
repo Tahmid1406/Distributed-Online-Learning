@@ -1,0 +1,13 @@
+{
+    "taining_accuracy": 0.9209575270457777,
+    "testing_accuracy": 0.9211342290927066,
+    "overall_accuracy": 0.9211342290927066,
+    "precision": 0.9219865260396,
+    "recall": 0.9211342290927066,
+    "f1score": 0.9210943871731456,
+    "fbeta": 0.941976687593154,
+    "true_positive_rate": 0.9436049072035231,
+    "true_negative_rate": 0.8986635509818901,
+    "false_positive_rate": 0.10133644901810991,
+    "false_negative_rate": 0.05639509279647688
+}
