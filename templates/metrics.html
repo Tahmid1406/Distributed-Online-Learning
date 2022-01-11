@@ -7,6 +7,7 @@
             <div class="col-md-10">
                 {% for metric in metric_list  %}
                     <div>
+                        <p>Metric for model {{loop.index}}</p>
                         Training Accuracy : {{metric['taining_accuracy']}} <br>
                         Testing Accuracy : {{metric['testing_accuracy']}} <br>
                         Overall Accuracy : {{metric['overall_accuracy']}} <br>
@@ -17,7 +18,7 @@
                         True Negative Rate : {{metric['true_negative_rate']}} <br>
                         False Positive Rate : {{metric['false_positive_rate']}} <br>
                         False Negative Rate : {{metric['false_negative_rate']}} <br>
-                                                       
+                        <p>----------------------------------------------------</p>                            
                     </div>
                 {% endfor %}
             </div>

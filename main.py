@@ -50,8 +50,12 @@ BEST_RECALL = 0
 BEST_FSCORE = 0
 BEST_FBETA = 0
 BEST_FNR = 0
+CURRENT_BEST_MODEL = "model1.pkl"
+CURRENT_MODEL_HASH = None
+CURRENT_BLOCK_NUMBER = 0
 
 
+BLOCKCHAIN = Blockchain()
 
 def updatehash(*args):
     hashing_text = ""; h = sha256()
@@ -67,6 +71,8 @@ def updatehash(*args):
 
 @app.route('/query', methods=['POST', 'GET'])
 def make_query():
+
+    model_no = len(os.listdir(MODEL_DIR))
     prediction = None
 
     if request.method == 'POST':
@@ -88,7 +94,7 @@ def make_query():
             ])
             ]
         
-        CURRENT_MODEL = pickle.load(open(MODEL_DIR + 'model' + str(model_no + 1) + '.pkl', 'rb'))
+        CURRENT_MODEL = pickle.load(open(MODEL_DIR + 'model' + str(model_no) + '.pkl', 'rb'))
 
         result = CURRENT_MODEL.predict(data)
 
@@ -109,7 +115,7 @@ def index():
 @app.route('/initialTraining', methods=['POST', 'GET'])
 def initialTraining():
 
-    model_no = len(os.listdir(METRIC_DIR))
+    model_no = len(os.listdir(MODEL_DIR))
     text = 'True'
     
     if request.method == 'POST':
@@ -188,6 +194,8 @@ def initialTraining():
 
             acc = (TP+TN)/(TP+FP+FN+TN)
 
+            hash = updatehash('model' + str(model_no + 1) + '.pkl', precision, recall, fbeta, fnr)
+
             data = {
                 'taining_accuracy' : train_accuracy,
                 'testing_accuracy': test_accuracy,
@@ -200,25 +208,29 @@ def initialTraining():
                 'true_negative_rate': tnr,  
                 'false_positive_rate': fpr,
                 'false_negative_rate' : fnr, 
+                'hash': hash
             }
 
 
             # setting up the best metrics for initial model
-            global BEST_PRECISION
-            BEST_PRECISION = precision
+           
 
             global BEST_RECALL
             BEST_RECALL = recall
-
-            global BEST_FSCORE
-            BEST_FSCORE = fscore
 
             global BEST_FBETA
             BEST_FBETA = fbeta
 
             global BEST_FNR
             BEST_FNR = fnr
+            global CURRENT_MODEL_HASH
+            CURRENT_MODEL_HASH = hash
 
+            global BLOCKCHAIN
+            global CURRENT_BLOCK_NUMBER
+            CURRENT_BLOCK_NUMBER = CURRENT_BLOCK_NUMBER + 1
+
+            BLOCKCHAIN.mine(Block(data, CURRENT_BLOCK_NUMBER))
 
             pickle.dump(perceptron_model_resampled, open(MODEL_DIR + 'model' + str(model_no + 1) + '.pkl', 'wb'))
 
@@ -235,98 +247,116 @@ def initialTraining():
 
 @app.route('/train' , methods=['POST', 'GET'])
 def train():
+
+    model_no = len(os.listdir(MODEL_DIR))
+
+    
     if request.method == 'POST':
-        global BEST_PRECISION
-        BEST_PRECISION = BEST_PRECISION + 1
+
+        file = request.files['csvfile']
+
+        file_no = len(os.listdir(INC_DATA_DIR)) 
+
+        filepath = os.path.join(INC_DATA_DIR + str(file_no + 1) + ".csv")
         
-        # files = sorted(os.listdir(BEST_METRIC_DIR), key=lambda x : int(x))
+        file.save(filepath)
 
-        # for file in files[0:]:
-        #     with open(METRIC_DIR + file) as f:
-        #         metric = json.load(f)
-        #         print(str(metric.get('precision')))
+        workfile = pd.read_csv('incremental/' + str(file_no+1) + '.csv')
 
-        # file = request.files['csvfile']
+        train, test = train_test_split(workfile, test_size=0.33, random_state=42)
 
-        # file_no = len(os.listdir(INC_DATA_DIR)) 
+        X_train = train.drop('isFraud', axis=1)
+        y_train = train.isFraud   
 
-        # filepath = os.path.join(INC_DATA_DIR + str(file_no + 1) + ".csv")
+        X_test = test.drop('isFraud', axis=1)
+        y_test = test.isFraud
+
+        X_train_resampled, y_train_resampled = SMOTE().fit_resample(X_train, y_train) 
+
+        X_test_resampled, y_test_resampled = SMOTE().fit_resample(X_test, y_test) 
+
+        perceptron_model_resampled = pickle.load(open(MODEL_DIR + 'model' + str(model_no) + '.pkl', 'rb'))
+
+        perceptron_model_resampled.partial_fit(X_train_resampled, y_train_resampled)
+
+        perceptron_train_preds = perceptron_model_resampled.predict(X_train_resampled)
+        perceptron_test_preds = perceptron_model_resampled.predict(X_test_resampled)
+
+        train_accuracy = roc_auc_score(y_train_resampled, perceptron_train_preds)
         
-        # file.save(filepath)
-
-        # workfile = pd.read_csv('incremental/' + str(file_no+1) + '.csv')
-
-        # train, test = train_test_split(workfile, test_size=0.33, random_state=42)
-
-        # X_train = train.drop('isFraud', axis=1)
-        # y_train = train.isFraud   
-
-        # X_test = test.drop('isFraud', axis=1)
-        # y_test = test.isFraud
-
-        # X_train_resampled, y_train_resampled = SMOTE().fit_resample(X_train, y_train) 
-
-        # X_test_resampled, y_test_resampled = SMOTE().fit_resample(X_test, y_test) 
-
-        # perceptron_model_resampled = pickle.load(open(MODEL_DIR + 'model' + str(model_no) + '.pkl', 'rb'))
-
-        # perceptron_model_resampled.partial_fit(X_train_resampled, y_train_resampled)
-
-        # perceptron_train_preds = perceptron_model_resampled.predict(X_train_resampled)
-        # perceptron_test_preds = perceptron_model_resampled.predict(X_test_resampled)
-
-        # train_accuracy = roc_auc_score(y_train_resampled, perceptron_train_preds)
-        
-        # test_accuracy = roc_auc_score(y_test_resampled, perceptron_test_preds)
+        test_accuracy = roc_auc_score(y_test_resampled, perceptron_test_preds)
         
 
 
-        # precision,recall,fscore,support = score(y_test_resampled,perceptron_test_preds,average='macro')
-        # fbeta = fbeta_score(y_test_resampled,perceptron_test_preds, beta=5)
+        precision,recall,fscore,support = score(y_test_resampled,perceptron_test_preds,average='macro')
+        fbeta = fbeta_score(y_test_resampled,perceptron_test_preds, beta=5)
 
-        # cf_matrix = confusion_matrix(y_test_resampled, perceptron_test_preds)
-        # CM = cf_matrix
-        # TN = CM[0][0]
-        # FN = CM[1][0]
-        # TP = CM[1][1]
-        # FP = CM[0][1]
+        cf_matrix = confusion_matrix(y_test_resampled, perceptron_test_preds)
+        CM = cf_matrix
+        TN = CM[0][0]
+        FN = CM[1][0]
+        TP = CM[1][1]
+        FP = CM[0][1]
 
-        # tpr = TP/(TP+FN)
-        # tnr = TN/(TN+FP) 
-        # fpr = FP/(FP+TN)
-        # fnr = FN/(TP+FN)
+        tpr = TP/(TP+FN)
+        tnr = TN/(TN+FP) 
+        fpr = FP/(FP+TN)
+        fnr = FN/(TP+FN)
 
-        # acc = (TP+TN)/(TP+FP+FN+TN)
+        acc = (TP+TN)/(TP+FP+FN+TN)
 
-        # data = {
-        #     'taining_accuracy' : train_accuracy,
-        #     'testing_accuracy': test_accuracy,
-        #     'overall_accuracy' : acc,
-        #     'precision': precision,
-        #     'recall' : recall, 
-        #     'f1score': fscore,
-        #     'fbeta': fbeta,
-        #     'true_positive_rate': tpr, 
-        #     'true_negative_rate': tnr,  
-        #     'false_positive_rate': fpr,
-        #     'false_negative_rate' : fnr, 
-        # }
+        hash = updatehash('model' + str(model_no + 1) + '.pkl', precision, recall, fbeta, fnr)
 
-        # with open(METRIC_DIR +  str(model_no + 1), 'w') as f:
-        #         json.dump(data, f, indent=4, ensure_ascii=False)
-        #         f.write('\n')
+        data = {
+            'taining_accuracy' : train_accuracy,
+            'testing_accuracy': test_accuracy,
+            'overall_accuracy' : acc,
+            'precision': precision,
+            'recall' : recall, 
+            'f1score': fscore,
+            'fbeta': fbeta,
+            'true_positive_rate': tpr, 
+            'true_negative_rate': tnr,  
+            'false_positive_rate': fpr,
+            'false_negative_rate' : fnr, 
+            'hash' : hash
+        }
+
+        global BEST_RECALL
+        global BEST_FBETA
+        global BEST_FNR
+        global CURRENT_MODEL_HASH
+
+        
+
+        if recall >= BEST_RECALL or fbeta >= BEST_FBETA or fnr <= BEST_FNR:
+            pickle.dump(perceptron_model_resampled, open(MODEL_DIR + 'model' + str(model_no + 1) + '.pkl', 'wb'))
+
+            CURRENT_MODEL_HASH = hash
+
+            if recall >= BEST_RECALL:
+                BEST_RECALL = recall
+            elif fbeta >= BEST_FBETA:
+                BEST_FBETA = fbeta 
+            elif fnr <= BEST_FNR:
+                BEST_FNR = fnr
+        
+
+        with open(METRIC_DIR +  str(model_no + 1), 'w') as f:
+                json.dump(data, f, indent=4, ensure_ascii=False)
+                f.write('\n')
     
                 
-    return render_template('train.html', precision = BEST_PRECISION)
+    return render_template('train.html', user= g.user, role=g.role)
 
 
 
 @app.route('/dashboard', methods=['POST', 'GET'])
 def dashboard():
 
-    total_model_no = len(os.listdir(MODEL_DIR))
+    total_model_no = len(os.listdir(METRIC_DIR))
 
-    return render_template('dashboard.html', model_no = total_model_no)
+    return render_template('dashboard.html', model_no = total_model_no, model_hash = CURRENT_MODEL_HASH)
 
 
 @app.route('/login' , methods=['POST', 'GET'])

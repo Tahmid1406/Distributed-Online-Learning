@@ -1,0 +1,7 @@
+{
+    "name": "User",
+    "pass1": "123456",
+    "pass2": "123456",
+    "hash": "561fe050a1a70d8debff4f5fde7a258270f07b09e7e967223c8329b91e56657a",
+    "role": "User"
+}

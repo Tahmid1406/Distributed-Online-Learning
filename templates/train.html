@@ -6,8 +6,18 @@
             <div class="col-md-2"></div>
             <div class="col-md-8">
 
-                <div class="mb-4 text-center">
+                <div class="mb-4 ">
                     <h3>Improve the model with more data </h3>
+                    <p>Your UserID :  <span class="username"> {{user}} </span> </p>
+                    <p>Your Role : <span class="username"> {{role}} </p>
+
+                    {% if role == 'Regulator' %}
+                        <p class="text-success"> Regulator can contribute to the model training </p>
+                    {% elif role == 'Contributor' %}
+                        <p class="text-success"> Contributor can contribute to the model training </p>
+                    {% else %}
+                        <p class="text-danger"> Only regulator and contributor can contribute to the model </p>
+                    {% endif %}
                 </div>
 
                 <form action="" class="" method="post" enctype="multipart/form-data">

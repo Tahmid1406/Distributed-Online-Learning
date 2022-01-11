@@ -1,13 +1,14 @@
 {
-    "taining_accuracy": 0.9209575270457777,
-    "testing_accuracy": 0.9211342290927066,
-    "overall_accuracy": 0.9211342290927066,
-    "precision": 0.9219865260396,
-    "recall": 0.9211342290927066,
-    "f1score": 0.9210943871731456,
-    "fbeta": 0.941976687593154,
-    "true_positive_rate": 0.9436049072035231,
-    "true_negative_rate": 0.8986635509818901,
-    "false_positive_rate": 0.10133644901810991,
-    "false_negative_rate": 0.05639509279647688
+    "taining_accuracy": 0.9162861929793249,
+    "testing_accuracy": 0.9173378870264683,
+    "overall_accuracy": 0.9173378870264683,
+    "precision": 0.9180682026856299,
+    "recall": 0.9173378870264683,
+    "f1score": 0.9173017710224173,
+    "fbeta": 0.8978834027481654,
+    "true_positive_rate": 0.8964400305576776,
+    "true_negative_rate": 0.9382357434952591,
+    "false_positive_rate": 0.06176425650474093,
+    "false_negative_rate": 0.10355996944232239,
+    "hash": "39daa3506934ff20d671a1ee65b8dd9d93675d3828e96a52a8af5b6751ebb30a"
 }
