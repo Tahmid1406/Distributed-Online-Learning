@@ -1,24 +1,79 @@
 {% extends "base.html" %}
 
 {% block content%}
-    <div class="container">
-        <div class="col-sm-8 mt-4">
+    <div class="container-fluid">
+        <div class=" mt-4">
             <h5>Current Blockchain </h5>
             <form action="{{url_for('print_blockchain')}}" class="mb-1">
                 <button class="btn btn-outline-info">Print Current Chain</button>
             </form>
-        
-            {% for block in current_chain  %}
-                <div>
-                        Block No : {{block['block_no']}} <br>
-                        Block Hash : {{block['block_hash']}} <br> 
-                        Previous Hash : {{block['previous_hash']}} <br>
-                        Nonce : {{block['nonce']}} <br>
-                        Data : {{block['data']}} <br>
-                        ---------------------------------------------------------- <br>
-                </div>
-            {% endfor %}
-        
+            
+            <table class="table block-table">
+                <thead>
+                    <tr>
+                        <th scope="col">Block No.</th>
+                        <th scope="col">Block Hash</th>
+                        <th scope="col">Previous Hash</th>
+                        <th scope="col">Nonce</th>
+                        <th scope="col">Data</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for block in current_chain  %}
+                        <tr>
+                            <th scope="row" rowspan="12">{{block['block_no']}} </th>
+                            <td rowspan="12"> {{block['block_hash']}} </td>
+                            <td rowspan="12"> {{block['previous_hash']}} </td>
+                            <td rowspan="12"> {{block['nonce']}} </td>
+                            <td>Model Hash : {{block['data']['hash']}}</td>      
+                        </tr>
+
+                        <tr>
+                            <td>Training Acc : {{block['data']['taining_accuracy']}}</td> 
+                        </tr> 
+
+                        <tr>
+                            <td>Testing Acc : {{block['data']['testing_accuracy']}}</td> 
+                        </tr> 
+
+                        <tr>
+                            <td>Overall Acc : {{block['data']['overall_accuracy']}}</td> 
+                        </tr> 
+                        
+                        <tr>
+                            <td>Precision : {{block['data']['precision']}}</td> 
+                        </tr>
+
+                        <tr>
+                            <td>Recall : {{block['data']['recall']}}</td> 
+                        </tr>
+
+                        <tr>
+                            <td>F1-Score : {{block['data']['f1score']}}</td> 
+                        </tr>
+
+                        <tr>
+                            <td>Fbeta-Score : {{block['data']['fbeta']}}</td> 
+                        </tr>
+
+                        <tr>
+                            <td>True Positive Rate : {{block['data']['true_positive_rate']}}</td> 
+                        </tr>
+
+                        <tr>
+                            <td>True Negative Rate : {{block['data']['true_negative_rate']}}</td> 
+                        </tr>
+
+                        <tr>
+                            <td>False Positive Rate : {{block['data']['false_positive_rate']}}</td> 
+                        </tr>
+
+                        <tr>
+                            <td>False Negative Rate : {{block['data']['false_negative_rate']}}</td> 
+                        </tr>
+                    {% endfor %} 
+                </tbody>
+              </table>
         </div>
     </div>    
 

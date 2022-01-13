@@ -2,13 +2,40 @@
 
 {% block content%}
     <div class="container dash-con">
-        <div class="row">
 
-            <div class=""> 
-                <h3>DashBoard</h3>
-                <span>Current Model : {{model_hash}}</span> <br>
-                <span>Total Contribution : {{model_no}} </span>
+        <div class=""> 
+            <h3>DashBoard</h3>
+            <span>Current Model : {{model_hash}}</span> <br>
+            <span>Total Contribution : {{model_no}} </span>
+        </div>
+
+        <div class="row circle-div-holder">
+            
+            <div class="col-md-4">
+                <div class="col-md-12 box-3">
+                    <a href="#">1</a>
+                </div>
+                <p class="mt-1 tc">Total Contribution</p>
+             </div>
+
+             <div class="col-md-4 ">
+                <div class="col-md-12 box-3">
+                    <a href="#">2</a>
+                </div>
+                <p class="mt-1 model-update">Model Updates</p>
+             </div>
+
+            <div class="col-md-4">
+               <div class="col-md-12 box-3">
+                    <a href="#">3</a>
+               </div>
+               <p class="mt-1 qs">Query Served</p>
             </div>
+             
+        </div>
+
+
+        <div class="row">
             
             <div class="col-md-4 ">
                 <div class="col-md-12 box">
@@ -52,6 +79,7 @@
              </div>
              
         </div>
+
     </div>    
 
 {% endblock %}

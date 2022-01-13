@@ -30,11 +30,11 @@ div.box-holder{
 }
 
 .dash-con{
-    margin-top: 50px;
+    margin-top: 30px;
 }
 .box{
-    height: 180px;
-    width: 350px;
+    height: 150px;
+    width: 300px;
     margin-top: 20px;
     background-color: rgb(226, 241, 237);
     display: flex;
@@ -43,6 +43,23 @@ div.box-holder{
     box-sizing: border-box;
     border-radius: 20px;
 }
+
+
+.box-3{
+    height: 100px;
+    width: 100px;
+    margin-top: 20px;
+    background-color: rgb(226, 241, 237);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    box-sizing: border-box;
+    border-radius: 50%;
+    margin-left: 90px;
+    margin-right: auto;
+}
+
+
 .box:hover{
     background-color: rgb(185, 219, 210);
 }
@@ -52,6 +69,19 @@ div.box-holder{
     color: black;
 }
 
+.box-3 a{
+    text-decoration: none;
+    color: black;
+}
+.tc{
+    margin-left: 60px;
+}
+.qs{
+    margin-left: 75px;
+}
+.model-update{
+    margin-left: 70px;
+}
 .box-parent{
     position: relative;
 }
@@ -90,3 +120,6 @@ select{
     white-space: nowrap;
 }
 
+table.block-table{
+    font-size: 12px !important;
+}
