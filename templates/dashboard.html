@@ -5,31 +5,35 @@
 
         <div class=""> 
             <h3>DashBoard</h3>
-            <span>Current Model : {{model_hash}}</span> <br>
-            <span>Total Contribution : {{model_no}} </span>
+            <h6>Current Model : {{model_hash}}</h6> 
         </div>
 
         <div class="row circle-div-holder">
             
             <div class="col-md-4">
+                <i class="far fa-handshake"></i>
+                
                 <div class="col-md-12 box-3">
-                    <a href="#">1</a>
+                    <h6>{{tot_con}}</h6>
                 </div>
-                <p class="mt-1 tc">Total Contribution</p>
+                
+                <h6 class="mt-2 tc">Total Contribution</h6>
              </div>
 
              <div class="col-md-4 ">
+                <i class="fas fa-sync-alt"></i>
                 <div class="col-md-12 box-3">
-                    <a href="#">2</a>
+                    <h6>{{ tot_model }}</h6>
                 </div>
-                <p class="mt-1 model-update">Model Updates</p>
+                <h6 class="mt-2 model-update">Model Updates</h6>
              </div>
 
             <div class="col-md-4">
+                <i class="far fa-check-square"></i>
                <div class="col-md-12 box-3">
-                    <a href="#">3</a>
+                    <h6>{{query}}</h6>
                </div>
-               <p class="mt-1 qs">Query Served</p>
+               <h6 class="mt-2 qs">Query Served</h6>
             </div>
              
         </div>

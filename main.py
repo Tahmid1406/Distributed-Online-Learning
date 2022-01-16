@@ -53,6 +53,7 @@ BEST_FNR = 0
 CURRENT_BEST_MODEL = "model1.pkl"
 CURRENT_MODEL_HASH = None
 CURRENT_BLOCK_NUMBER = 0
+QUERY_SERVED = 0
 
 
 BLOCKCHAIN = Blockchain()
@@ -66,6 +67,9 @@ def updatehash(*args):
 
     h.update(hashing_text.encode('utf-8'))
     return h.hexdigest()
+
+def calculateIncentive():
+    pass
 
 
 
@@ -102,6 +106,9 @@ def make_query():
             prediction = "Fraud"
         else:
             prediction = "Non-Fraud"
+
+        global QUERY_SERVED
+        QUERY_SERVED += 1
 
     return render_template('makeQuery.html', pred=prediction)
 
@@ -326,13 +333,18 @@ def train():
         global BEST_FBETA
         global BEST_FNR
         global CURRENT_MODEL_HASH
-
+        global BLOCKCHAIN
+        global CURRENT_BLOCK_NUMBER
         
 
         if recall >= BEST_RECALL or fbeta >= BEST_FBETA or fnr <= BEST_FNR:
             pickle.dump(perceptron_model_resampled, open(MODEL_DIR + 'model' + str(model_no + 1) + '.pkl', 'wb'))
-
+            CURRENT_BLOCK_NUMBER = CURRENT_BLOCK_NUMBER + 1
             CURRENT_MODEL_HASH = hash
+
+            BLOCKCHAIN.mine(Block(data, CURRENT_BLOCK_NUMBER))
+
+            incentive = calculateIncentive()
 
             if recall >= BEST_RECALL:
                 BEST_RECALL = recall
@@ -354,9 +366,12 @@ def train():
 @app.route('/dashboard', methods=['POST', 'GET'])
 def dashboard():
 
-    total_model_no = len(os.listdir(METRIC_DIR))
+    total_contribution = len(os.listdir(METRIC_DIR))
+    total_model = len(os.listdir(MODEL_DIR))
+    global QUERY_SERVED
+    qs = QUERY_SERVED
 
-    return render_template('dashboard.html', model_no = total_model_no, model_hash = CURRENT_MODEL_HASH)
+    return render_template('dashboard.html', tot_con = total_contribution, tot_model=total_model, query=qs, model_hash = CURRENT_MODEL_HASH)
 
 
 @app.route('/login' , methods=['POST', 'GET'])
