@@ -1,7 +1,6 @@
 from flask import Flask
 from flask import render_template, session, request, redirect, g, url_for 
 from blockchain import *
-from flask_sqlalchemy import SQLAlchemy 
 from datetime import datetime
 import pickle
 import os
@@ -16,18 +15,17 @@ import seaborn as sns
 from imblearn.over_sampling import SMOTE
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import classification_report, accuracy_score, roc_auc_score,fbeta_score # import accuracy metrics
-from sklearn.naive_bayes import MultinomialNB
-from sklearn.naive_bayes import BernoulliNB
 from sklearn.linear_model import SGDClassifier
-from sklearn.metrics import recall_score
 from sklearn.metrics import confusion_matrix
 import pickle
 import warnings
 warnings.filterwarnings("ignore")
 from sklearn.metrics import precision_recall_fscore_support as score
-from sklearn.model_selection import learning_curve
-
-
+import base64
+from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
+import matplotlib.pyplot as plt
+import seaborn as sns
+import io
 
 
 app = Flask(__name__)
@@ -108,9 +106,12 @@ def make_query():
             prediction = "Non-Fraud"
 
         global QUERY_SERVED
+        global BEST_RECALL
+        global BEST_FBETA
+        global BEST_FNR
         QUERY_SERVED += 1
 
-    return render_template('makeQuery.html', pred=prediction)
+    return render_template('makeQuery.html', pred=prediction, br=BEST_RECALL, bfb=BEST_FBETA, bfnr=BEST_FNR)
 
 
 
@@ -449,9 +450,8 @@ def view_metrics():
 
 
 @app.route('/analysis' , methods=['POST', 'GET'])
-def view_analysis():
-    
-    return render_template('analysis.html')
+def view_analysis(): 
+    return render_template('analysis.html') 
 
 
 

@@ -7,11 +7,42 @@
     <div class="container dash-con">
 
         <div class="row">
-            <div class="col-2"></div>
-            <div class="col-8 mt-4 pq-box">
+            <div class="col-1"></div>
+            <div class="col-10 pq-box">
 
-                <div class="text-center mb-5">
-                    <h3>Use the current model for prediction </h3>
+                <div class="mb-4">
+                    <h3>Use The Current Best Model For Prediction </h3>
+                    
+                    <div class="row circle-div-holder">
+            
+                        <div class="col-md-4">
+                            <i class="fas fa-bullseye"></i>
+                            
+                            <div class="col-md-12 box-3">
+                                <h6>{{'%0.3f'| format(br) }}</h6>
+                            </div>
+                            
+                            <h6 class="mt-2 bp">Best Recall</h6>
+                         </div>
+            
+                         <div class="col-md-4 ">
+                            <i class="fas fa-bullseye"></i>
+                            <div class="col-md-12 box-3">
+                                <h6>{{ '%0.3f'| format(bfb) }}</h6>
+                            </div>
+                            <h6 class="mt-2 bp-2">Best FBeta</h6>
+                         </div>
+            
+                        <div class="col-md-4">
+                            <i class="fas fa-bullseye"></i>
+                           <div class="col-md-12 box-3">
+                                <h6>{{ '%0.3f'| format(bfnr) }}</h6>
+                           </div>
+                           <h6 class="mt-2 bp-3">Best FNR</h6>
+                        </div>
+                         
+                    </div>
+
                 </div>
 
                 <form class="mt-2 mb-2" action="{{ url_for('make_query') }}" method="POST">
@@ -65,13 +96,13 @@
                 </form>
 
                 {% if pred == 'Fraud' %}
-                    <h4>This transaction is fraudulent</h4>
+                    <h4 class="text-danger">This transaction is fraudulent</h4>
                 {% elif pred == 'Non-Fraud' %}
-                    <h4>This transaction is not fraudulent</h4>
+                    <h4 class="text-success">This transaction is not fraudulent</h4>
                 {% endif %}
 
             </div>
-            <div class="col-2"></div>
+            <div class="col-1"></div>
         </div>
     </div>
 </div>      

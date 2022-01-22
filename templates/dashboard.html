@@ -1,12 +1,38 @@
 {% extends "base.html" %}
 
 {% block content%}
-    <div class="container dash-con">
+    <div class="dash-container"> 
+        <h4>DashBoard</h4>
+        <h6>Current Model : {{model_hash}}</h6> 
+    </div>
+    <div class="dashboard-content-holder">
+        <div class="">
+            <div class="left-box">
+                <div class="first"></div>
+                <div class="second"></div>
+                <div class="third"></div>
+            </div>
+            <div class="right-box">
+                <div class="row">
+                    <div class="col-3 box-5">hello</div>
+                    <div class="col-3 box-5">hello</div>
+                    <div class="col-3 box-5">hello</div>
+                    <div class="col-3 box-5">hello</div>
+                </div>
 
-        <div class=""> 
-            <h3>DashBoard</h3>
-            <h6>Current Model : {{model_hash}}</h6> 
+                <div class="row">
+                    <div class="col-7 box-6">
+                        
+                    </div>
+                    <div class="col-5 box-7">hello</div>
+                </div>
+
+            </div>
         </div>
+    </div>
+
+    <div class="dash-con">
+
 
         <div class="row circle-div-holder">
             
@@ -39,10 +65,11 @@
         </div>
 
 
-        <div class="row">
+        <div class="row dash-content-holder">
             
             <div class="col-md-4 ">
                 <div class="col-md-12 box">
+                    <div><i class="far fa-play-circle"></i></div> <br> 
                     <a href="/initialTraining">Initiate Model</a>
                 </div>
              </div>
@@ -84,7 +111,7 @@
              
         </div>
 
-    </div>    
+    </div>   
 
 {% endblock %}
 

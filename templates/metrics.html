@@ -1,28 +1,47 @@
 {% extends "base.html" %}
 
 {% block content%}
-    <div class="container">
+    <div class="container mt-4">
         <div class="row">
-            <div class="col-md-1"></div>
-            <div class="col-md-10">
-                {% for metric in metric_list  %}
-                    <div>
-                        <p>Metric for model {{loop.index}}</p>
-                        Training Accuracy : {{metric['taining_accuracy']}} <br>
-                        Testing Accuracy : {{metric['testing_accuracy']}} <br>
-                        Overall Accuracy : {{metric['overall_accuracy']}} <br>
-                        Precision : {{metric['precision']}} <br>
-                        Recall : {{metric['recall']}} <br>
-                        F1Score : {{metric['f1score']}} <br>
-                        True Positive Rate : {{metric['true_positive_rate']}} <br>
-                        True Negative Rate : {{metric['true_negative_rate']}} <br>
-                        False Positive Rate : {{metric['false_positive_rate']}} <br>
-                        False Negative Rate : {{metric['false_negative_rate']}} <br>
-                        <p>----------------------------------------------------</p>                            
-                    </div>
-                {% endfor %}
-            </div>
-            <div class="col-md-1"></div>
+            <h5>ML Model Learnign History and Their Metrics</h5>
+
+            <table class="table table-bordered block-table-2 mt-4">
+                <thead>
+                    <tr>
+                        <th scope="col">Model No.</th>
+                        <th scope="col">Training Accuracy </th>
+                        <th scope="col">Testing Accuracy </th> 
+                        <th scope="col">Overall Accuracy </th>
+                        <th scope="col">Precision </th>
+                        <th scope="col"> Recall </th>
+                        <th scope="col">F1Score </th>
+                        <th scope="col">FBeta </th>
+                        <th scope="col">True Positive Rate </th>
+                        <th scope="col"> True Negative Rate </th>
+                        <th scope="col"> False Positive Rate </th>
+                        <th scope="col"> False Negative Rate </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for metric in metric_list  %}
+                        <tr>
+                            <th class="text-center" scope="row">{{loop.index}} </th>  
+                            <td>{{ '%0.2f'| format(metric['taining_accuracy']) }}</td> 
+                            <td>{{'%0.2f'| format(metric['testing_accuracy']) }}</td> 
+                            <td>{{'%0.2f'| format(metric['overall_accuracy']) }} </td>
+                            <td>{{'%0.2f'| format(metric['precision']) }}</td>
+                            <td>{{'%0.2f'| format(metric['recall']) }} </td>
+                            <td>{{'%0.2f'| format(metric['f1score']) }} </td>
+                            <td>{{'%0.2f'| format(metric['fbeta']) }} </td>
+                            <td>{{'%0.2f'| format(metric['true_positive_rate']) }} </td>
+                            <td>{{'%0.2f'| format(metric['true_negative_rate']) }} </td>
+                            <td>{{'%0.2f'| format(metric['false_positive_rate']) }} </td>
+                            <td>{{'%0.2f'| format(metric['false_negative_rate']) }}</td>
+                        </tr>
+                    {% endfor %} 
+                </tbody>
+            </table>
+            
         </div>
     </div>    
 
