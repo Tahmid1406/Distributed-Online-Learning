@@ -2,29 +2,105 @@
 
 {% block content%}
     <div class="dash-container"> 
-        <h4>DashBoard</h4>
+        <h4 class="dashboard-heading">DashBoard</h4>
         <h6>Current Model : {{model_hash}}</h6> 
     </div>
     <div class="dashboard-content-holder">
         <div class="">
-            <div class="left-box">
-                <div class="first"></div>
-                <div class="second"></div>
-                <div class="third"></div>
-            </div>
-            <div class="right-box">
-                <div class="row">
-                    <div class="col-3 box-5">hello</div>
-                    <div class="col-3 box-5">hello</div>
-                    <div class="col-3 box-5">hello</div>
-                    <div class="col-3 box-5">hello</div>
+
+            <div class="left-box text-center">
+
+                <div class="left-box-inner">
+                    <i class="far fa-handshake"></i>
+                
+                    <div class="col-md-12">
+                        <h6>{{tot_con}}</h6>
+                    </div>
+                    
+                    <h6 class="tot-con">Total Contribution</h6>
                 </div>
 
-                <div class="row">
-                    <div class="col-7 box-6">
-                        
+                <div class="left-box-inner">
+                    <i class="fas fa-sync-alt"></i>
+                    <div class="col-md-12">
+                        <h6>{{ tot_model }}</h6>
                     </div>
-                    <div class="col-5 box-7">hello</div>
+                    <h6 class="mt-2 tot-con">Model Updates</h6>
+                </div>
+
+                <div class="left-box-inner">
+                    <i class="far fa-check-square"></i>
+                    <div class="col-md-12">
+                            <h6>{{query}}</h6>
+                    </div>
+                    <h6 class="mt-2 tot-con">Query Served</h6>
+                </div>
+
+            </div>
+
+            <div class="right-box">
+                <div class="row first-row">
+                    <div class="col-3 box-5">
+                        <a href="/initialTraining">Initiate Model</a>
+                    </div>
+                    <div class="col-3 box-5">
+                        <a href="/train">Contribute</a>
+                    </div>
+                    <div class="col-3 box-5">
+                        <a href="/query">Make A Query</a>
+                    </div>
+                    <div class="col-3 box-5">
+                        <a href="/analysis">Analytics</a>
+                    </div>
+                </div>
+
+                <div class="row g-0">
+                    <div class="col-7 box-6">
+                        <div class="divtop-transaction">
+                            <div class="left">
+                                <h6>Recent Transactions</h6>
+                            </div>
+                            <div class="right">
+                                <a class="" href="#">See All</a>
+                            </div>
+                        </div>
+
+                        <div class="transactions-content">
+                            <table class="table transaction-table">
+                                <thead>
+                                    <tr>
+                                        <th scope="col">Block Hash</th>
+                                        <th scope="col">Previous Hash</th>
+                                        <th scope="col">Nonce</th>
+                                        <th scope="col">Model Hash</th>
+                                        <th scope="col">FBeta</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for block in current_chain|reverse  %}
+                                        <tr>
+                                            <td> {{block['block_hash']|truncate(24, True) }} </td>
+                                            <td> {{block['previous_hash']|truncate(24, True) }} </td>
+                                            <td> {{block['nonce']}} </td>
+                                            <td> {{block['data']['hash']|truncate(24, True) }}</td> 
+                                            <td>{{ '%0.7f'| format(block['data']['fbeta'])}}</td>      
+                                        </tr>
+                                    {% endfor %} 
+                                </tbody>
+                            </table>
+                        </div>
+
+                    </div>
+                    <div class="col-5 box-7">
+                        <div class="divtop-metric">
+                            <div class="left">
+                                <h6>Recent Metric Updates</h6>
+                            </div>
+                            <div class="right">
+                                <a class="" href="#">See All</a>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
             </div>
@@ -110,6 +186,33 @@
              </div>
              
         </div>
+
+
+
+        <table class="table block-table transaction-table">
+            <thead>
+                <tr>
+                    <th scope="col">Block No.</th>
+                    <th scope="col">Block Hash</th>
+                    <th scope="col">Previous Hash</th>
+                    <th scope="col">Nonce</th>
+                    <th scope="col">Model Hash</th>
+                    <th scope="col">FBeta</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for block in current_chain|reverse  %}
+                    <tr>
+                        <th scope="row">{{block['block_no']}} </th>
+                        <td width="50px" class="short-hash"> {{block['block_hash']}} </td>
+                        <td class="short-hash"> {{block['previous_hash']}} </td>
+                        <td > {{block['nonce']}} </td>
+                        <td class="short-hash"> {{block['data']['hash']}}</td> 
+                        <td class="short-text-2">{{block['data']['fbeta']}}</td>      
+                    </tr>
+                {% endfor %} 
+            </tbody>
+        </table>
 
     </div>   
 

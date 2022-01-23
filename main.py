@@ -372,7 +372,16 @@ def dashboard():
     global QUERY_SERVED
     qs = QUERY_SERVED
 
-    return render_template('dashboard.html', tot_con = total_contribution, tot_model=total_model, query=qs, model_hash = CURRENT_MODEL_HASH)
+    files = sorted(os.listdir(BLOCKCHAIN_DIR), key=lambda x : int(x))
+    
+    results = []
+
+    for file in files[0:]:
+        with open(BLOCKCHAIN_DIR + file) as f:
+            block = json.load(f)
+        results.append(block)
+
+    return render_template('dashboard.html', tot_con = total_contribution, tot_model=total_model, query=qs, model_hash = CURRENT_MODEL_HASH, current_chain=results)
 
 
 @app.route('/login' , methods=['POST', 'GET'])
