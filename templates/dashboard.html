@@ -40,7 +40,8 @@
 
             <div class="right-box">
                 <div class="row first-row">
-                    <div class="col-3 box-5">
+                    <div class="col-3 box-5">   
+                        <i class="far fa-check-square"></i>
                         <a href="/initialTraining">Initiate Model</a>
                     </div>
                     <div class="col-3 box-5">
@@ -61,7 +62,7 @@
                                 <h6>Recent Transactions</h6>
                             </div>
                             <div class="right">
-                                <a class="" href="#">See All</a>
+                                <a class="" href="/printchain">See All</a>
                             </div>
                         </div>
 
@@ -78,13 +79,15 @@
                                 </thead>
                                 <tbody>
                                     {% for block in current_chain|reverse  %}
-                                        <tr>
-                                            <td> {{block['block_hash']|truncate(24, True) }} </td>
-                                            <td> {{block['previous_hash']|truncate(24, True) }} </td>
-                                            <td> {{block['nonce']}} </td>
-                                            <td> {{block['data']['hash']|truncate(24, True) }}</td> 
-                                            <td>{{ '%0.7f'| format(block['data']['fbeta'])}}</td>      
-                                        </tr>
+                                        {% if loop.index <= 5 %}
+                                            <tr>
+                                                <td> {{block['block_hash']|truncate(24, True) }} </td>
+                                                <td> {{block['previous_hash']|truncate(24, True) }} </td>
+                                                <td> {{block['nonce']}} </td>
+                                                <td> {{block['data']['hash']|truncate(24, True) }}</td> 
+                                                <td>{{ '%0.7f'| format(block['data']['fbeta'])}}</td>      
+                                            </tr>
+                                        {% endif %}
                                     {% endfor %} 
                                 </tbody>
                             </table>
@@ -97,8 +100,34 @@
                                 <h6>Recent Metric Updates</h6>
                             </div>
                             <div class="right">
-                                <a class="" href="#">See All</a>
+                                <a class="" href="/metrics">See All</a>
                             </div>
+                        </div>
+                        <div class="metric-content">
+                            <table class="table transaction-table">
+                                <thead>
+                                    <tr>   
+                                        <th scope="col">Precision </th>
+                                        <th scope="col"> Recall </th>
+                                        <th scope="col">F1Score </th>
+                                        <th scope="col">FBeta </th>
+                                      <th scope="col"> False Negative Rate </th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for metric in metric_list|reverse  %}
+                                        {% if loop.index <= 5 %}
+                                            <tr>  
+                                                <td>{{'%0.7f'| format(metric['precision']) }}</td>
+                                                <td>{{'%0.7f'| format(metric['recall']) }} </td>
+                                                <td>{{'%0.7f'| format(metric['f1score']) }} </td>
+                                                <td>{{'%0.7f'| format(metric['fbeta']) }} </td>
+                                                <td>{{'%0.7f'| format(metric['false_negative_rate']) }}</td>
+                                            </tr>
+                                        {% endif %}
+                                    {% endfor %} 
+                                </tbody>
+                            </table>
                         </div>
                     </div>
                 </div>
@@ -107,114 +136,7 @@
         </div>
     </div>
 
-    <div class="dash-con">
-
-
-        <div class="row circle-div-holder">
-            
-            <div class="col-md-4">
-                <i class="far fa-handshake"></i>
-                
-                <div class="col-md-12 box-3">
-                    <h6>{{tot_con}}</h6>
-                </div>
-                
-                <h6 class="mt-2 tc">Total Contribution</h6>
-             </div>
-
-             <div class="col-md-4 ">
-                <i class="fas fa-sync-alt"></i>
-                <div class="col-md-12 box-3">
-                    <h6>{{ tot_model }}</h6>
-                </div>
-                <h6 class="mt-2 model-update">Model Updates</h6>
-             </div>
-
-            <div class="col-md-4">
-                <i class="far fa-check-square"></i>
-               <div class="col-md-12 box-3">
-                    <h6>{{query}}</h6>
-               </div>
-               <h6 class="mt-2 qs">Query Served</h6>
-            </div>
-             
-        </div>
-
-
-        <div class="row dash-content-holder">
-            
-            <div class="col-md-4 ">
-                <div class="col-md-12 box">
-                    <div><i class="far fa-play-circle"></i></div> <br> 
-                    <a href="/initialTraining">Initiate Model</a>
-                </div>
-             </div>
-
-             <div class="col-md-4 ">
-                <div class="col-md-12 box">
-                 <a href="/train">Contribute</a>
-                </div>
-             </div>
-
-            <div class="col-md-4">
-               <div class="col-md-12 box">
-                    <a href="/query">Make A Query</a>
-               </div>
-            </div>
-
-
-            
-
-            <div class="col-md-4 ">
-                <div class="col-md-12 box">
-                    <a href="/printchain">Current Chain</a>
-                </div>
-             </div>
-
-
-             <div class="col-md-4 ">
-                <div class="col-md-12 box">
-                    <a href="/metrics">Model Metrics</a>
-                </div>
-             </div>
-
-
-             <div class="col-md-4 ">
-                <div class="col-md-12 box">
-                    <a href="/analysis">Analytics</a>
-                </div>
-             </div>
-             
-        </div>
-
-
-
-        <table class="table block-table transaction-table">
-            <thead>
-                <tr>
-                    <th scope="col">Block No.</th>
-                    <th scope="col">Block Hash</th>
-                    <th scope="col">Previous Hash</th>
-                    <th scope="col">Nonce</th>
-                    <th scope="col">Model Hash</th>
-                    <th scope="col">FBeta</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for block in current_chain|reverse  %}
-                    <tr>
-                        <th scope="row">{{block['block_no']}} </th>
-                        <td width="50px" class="short-hash"> {{block['block_hash']}} </td>
-                        <td class="short-hash"> {{block['previous_hash']}} </td>
-                        <td > {{block['nonce']}} </td>
-                        <td class="short-hash"> {{block['data']['hash']}}</td> 
-                        <td class="short-text-2">{{block['data']['fbeta']}}</td>      
-                    </tr>
-                {% endfor %} 
-            </tbody>
-        </table>
-
-    </div>   
+    
 
 {% endblock %}
 

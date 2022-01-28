@@ -39,6 +39,7 @@ INC_DATA_DIR = 'incremental/'
 METRIC_DIR = 'metric/'
 BEST_METRIC_DIR = 'bestMetric/'
 
+
 model_no = len(os.listdir(METRIC_DIR))
 
 
@@ -154,27 +155,6 @@ def initialTraining():
             perceptron_model_resampled = SGDClassifier(loss="perceptron", eta0=0.00001, learning_rate="constant", penalty=None)
 
             perceptron_model_resampled.fit(X_train_resampled, y_train_resampled)
-            
-
-            # train_sizes_acc, train_scores_acc, test_scores_acc = learning_curve(sgd_model_resampled, 
-            #                                         X_train_resampled, 
-            #                                         y_train_resampled, 
-            #                                         scoring='recall', 
-            #                                         n_jobs=1, 
-            #                                         cv=5,
-            #                                         train_sizes=linspace(0.1, 1, 5),
-            #                                         verbose=1)
-
-            # train_mean_acc = np.mean(train_scores_acc, axis=1)
-            # test_mean_acc = np.mean(test_scores_acc, axis=1)
-
-            # plt.plot(train_sizes_acc, train_mean_acc, label='Training Scores')
-            # plt.plot(train_mean_acc, test_mean_acc, label='Test Scores')
-            # plt.title("Learning curves for training and testing datasets")
-            # plt.xlabel("Trainig Size")
-            # plt.ylabel("Accuracy Score")
-            # plt.legend(loc='best')
-            # plt.savefig('static/initial.png')
 
             perceptron_train_preds = perceptron_model_resampled.predict(X_train_resampled)
             perceptron_test_preds = perceptron_model_resampled.predict(X_test_resampled)
@@ -237,6 +217,7 @@ def initialTraining():
             global BLOCKCHAIN
             global CURRENT_BLOCK_NUMBER
             CURRENT_BLOCK_NUMBER = CURRENT_BLOCK_NUMBER + 1
+            
 
             BLOCKCHAIN.mine(Block(data, CURRENT_BLOCK_NUMBER))
 
@@ -330,6 +311,10 @@ def train():
             'hash' : hash
         }
 
+        with open(METRIC_DIR +  str(model_no + 1), 'w') as f:
+            json.dump(data, f, indent=4, ensure_ascii=False)
+            f.write('\n')
+
         global BEST_RECALL
         global BEST_FBETA
         global BEST_FNR
@@ -345,6 +330,7 @@ def train():
 
             BLOCKCHAIN.mine(Block(data, CURRENT_BLOCK_NUMBER))
 
+
             incentive = calculateIncentive()
 
             if recall >= BEST_RECALL:
@@ -355,9 +341,7 @@ def train():
                 BEST_FNR = fnr
         
 
-        with open(METRIC_DIR +  str(model_no + 1), 'w') as f:
-                json.dump(data, f, indent=4, ensure_ascii=False)
-                f.write('\n')
+       
     
                 
     return render_template('train.html', user= g.user, role=g.role)
@@ -381,7 +365,18 @@ def dashboard():
             block = json.load(f)
         results.append(block)
 
-    return render_template('dashboard.html', tot_con = total_contribution, tot_model=total_model, query=qs, model_hash = CURRENT_MODEL_HASH, current_chain=results)
+    met_files = sorted(os.listdir(METRIC_DIR), key=lambda x : int(x))
+    
+    met_results = []
+
+    for file in met_files[0:]:
+        with open(METRIC_DIR + file) as f:
+            metric = json.load(f)
+        met_results.append(metric)
+
+    return render_template('dashboard.html', tot_con = total_contribution, 
+            tot_model=total_model, query=qs, 
+            model_hash = CURRENT_MODEL_HASH, current_chain=results, metric_list=met_results)
 
 
 @app.route('/login' , methods=['POST', 'GET'])
@@ -457,9 +452,57 @@ def view_metrics():
     return render_template('metrics.html', metric_list = results)
 
 
-
 @app.route('/analysis' , methods=['POST', 'GET'])
 def view_analysis(): 
+
+    files = sorted(os.listdir(BLOCKCHAIN_DIR), key=lambda x : int(x))
+    counter = 1
+    counter_array = []
+    acc_array = []
+    recall_array = []
+    fbeta_array = []
+    fnr_array = []
+
+    for file in files[0:]:
+        with open(BLOCKCHAIN_DIR + str(counter)) as f:
+            file = json.load(f)
+            block_no = file.get('block_no')
+            test_acc = file.get('data')['testing_accuracy']
+            rec = file.get('data')['recall']
+            fbet = file.get('data')['fbeta']
+            fnr = file.get('data')['false_negative_rate']
+
+            counter_array.append(counter)
+            counter += 1
+            acc_array.append(test_acc)
+            recall_array.append(rec)
+            fbeta_array.append(fbet)
+            fnr_array.append(fnr)
+
+    fig, axs = plt.subplots(2,1,figsize=(16,9), gridspec_kw={'height_ratios': [1, 2]})
+    plt.subplot(2,2,1)
+    graph = sns.lineplot(x=counter_array, y=acc_array, label="Test Accuracy Over Increments",marker="o")
+    graph.set_xlabel("ML Model Increment Number", fontsize = 16)
+    graph.set_ylabel("Test Accuracy Increment", fontsize = 16)
+
+    plt.subplot(2,2,2)
+    graph = sns.lineplot(x=counter_array, y=recall_array, label="Recall Over Increments",marker="s")
+    graph.set_xlabel("ML Model Increment Number", fontsize = 16)
+    graph.set_ylabel("Recall Update", fontsize = 16)
+   
+
+    plt.subplot(2,2,3)
+    graph = sns.lineplot(x=counter_array, y=fbeta_array, label="F-Beta over Increments", marker="X")
+    graph.set_xlabel("ML Model Increment Number", fontsize = 16)
+    graph.set_ylabel("F-Beta Update", fontsize = 16)
+   
+
+    plt.subplot(2,2,4)
+    graph = sns.lineplot(x=counter_array, y=fnr_array, label="FNR over Increments", marker="o")
+    graph.set_xlabel("ML Model Increment Number", fontsize = 16)
+    graph.set_ylabel("FNR Update", fontsize = 16)
+    plt.savefig('1.png', bbox_inches="tight")
+
     return render_template('analysis.html') 
 
 
