@@ -1,3 +1,4 @@
+from codecs import IncrementalDecoder
 from flask import Flask
 from flask import render_template, session, request, redirect, g, url_for 
 from blockchain import *
@@ -26,6 +27,7 @@ from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
 import matplotlib.pyplot as plt
 import seaborn as sns
 import io
+import time
 
 
 app = Flask(__name__)
@@ -55,6 +57,9 @@ CURRENT_BLOCK_NUMBER = 0
 QUERY_SERVED = 0
 
 
+INCREMENT_COUNTER = 0.01
+
+
 BLOCKCHAIN = Blockchain()
 
 def updatehash(*args):
@@ -67,8 +72,17 @@ def updatehash(*args):
     h.update(hashing_text.encode('utf-8'))
     return h.hexdigest()
 
-def calculateIncentive():
-    pass
+def calculateIncentive(recall, fbeta, fnr):
+    global INCREMENT_COUNTER
+    global BEST_RECALL
+    global BEST_FBETA
+    global BEST_FNR
+
+    incentive = INCREMENT_COUNTER * ((  ((BEST_RECALL - recall)**2) *  ((BEST_FBETA - fbeta)**2)  )/  ((BEST_FNR - fnr)**2) )
+    INCREMENT_COUNTER += 0.02
+    
+    return incentive
+    
 
 
 
@@ -118,7 +132,7 @@ def make_query():
 
 @app.route('/', methods=['POST', 'GET'])
 def index():
-    return render_template('index.html', user= g.user, role=g.role)
+    return render_template('index.html', user= g.user, role=g.role, balance = g.balance)
 
 
 @app.route('/initialTraining', methods=['POST', 'GET'])
@@ -231,7 +245,7 @@ def initialTraining():
         else:
             text = "False"
 
-    return render_template('initialTraining.html', user= g.user, role=g.role, training_text = text)
+    return render_template('initialTraining.html', user= g.user, role=g.role, balance = g.balance, training_text = text)
 
 
 @app.route('/train' , methods=['POST', 'GET'])
@@ -241,6 +255,8 @@ def train():
 
     
     if request.method == 'POST':
+        
+        start_time = time.time()
 
         file = request.files['csvfile']
 
@@ -328,10 +344,10 @@ def train():
             CURRENT_BLOCK_NUMBER = CURRENT_BLOCK_NUMBER + 1
             CURRENT_MODEL_HASH = hash
 
+            
             BLOCKCHAIN.mine(Block(data, CURRENT_BLOCK_NUMBER))
+           
 
-
-            incentive = calculateIncentive()
 
             if recall >= BEST_RECALL:
                 BEST_RECALL = recall
@@ -339,12 +355,14 @@ def train():
                 BEST_FBETA = fbeta 
             elif fnr <= BEST_FNR:
                 BEST_FNR = fnr
-        
 
+            incentive = calculateIncentive(recall, fbeta, fnr)
+        
+        print("--- %s seconds ---" % (time.time() - start_time))
        
     
                 
-    return render_template('train.html', user= g.user, role=g.role)
+    return render_template('train.html', user= g.user, role=g.role, balance = g.balance)
 
 
 
@@ -394,6 +412,7 @@ def login():
                 if (user.get('name') == uname and user.get('pass1')== passw):
                     session['user'] = user.get('hash')
                     session['role'] = user.get('role')
+                    session['balance'] = user.get('balance')
                     return redirect(url_for('index'))
                 else:
                     login_text = "username " + uname + " not found in the datebase"
@@ -422,7 +441,8 @@ def register():
             'pass1' : pass1,
             'pass2' : pass2,
             'hash' : hash,
-            'role' : user_role
+            'role' : user_role,
+            'balance' : 100
         }
         user_no = len(os.listdir(USER_DIR))
 
@@ -501,7 +521,7 @@ def view_analysis():
     graph = sns.lineplot(x=counter_array, y=fnr_array, label="FNR over Increments", marker="o")
     graph.set_xlabel("ML Model Increment Number", fontsize = 16)
     graph.set_ylabel("FNR Update", fontsize = 16)
-    plt.savefig('1.png', bbox_inches="tight")
+    plt.savefig('static/1.png', bbox_inches="tight")
 
     return render_template('analysis.html') 
 
@@ -527,10 +547,12 @@ def print_blockchain():
 def before_request():
     g.user = None
     g.role = None
+    g.balance = None
 
     if 'user' in session:
         g.user = session['user']
         g.role = session['role']
+        g.balance = session['balance']
 
 if __name__ == '__main__':
     app.run(debug=True)

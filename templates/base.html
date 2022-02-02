@@ -36,6 +36,7 @@
                 {% if user %}
                     <p class="show-less">UserID :  <span class="username"> {{user}} </span> </p>
                     <p class="role">Role : <span class="username"> {{role}} </p>
+                    <p class="role">Balance : <span class="balance"> {{balance}} </span> </p>
                 {%else %}
                     <form action="{{url_for('login')}}">
                         <button class="btn btn-outline-success" type="submit">Login</button>            

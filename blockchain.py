@@ -43,7 +43,7 @@ class Block:
         )
 
 class Blockchain:   
-    difficulty = 3 
+    difficulty = 2 
 
     def __init__(self):
         self.chain = []
