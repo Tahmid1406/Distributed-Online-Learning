@@ -1,0 +1,20 @@
+{
+    "block_no": 3,
+    "block_hash": "0000026867b9b267ea06660541d05145695e02385f32b4010d24570e9e1d7e6e",
+    "previous_hash": "00000fca567a278aa105088c6049b606daef4f1764a712c967e0addf9f29cb50",
+    "nonce": 170219,
+    "data": {
+        "taining_accuracy": 0.9510373319761699,
+        "testing_accuracy": 0.9637770709669577,
+        "overall_accuracy": 0.9637770709669577,
+        "precision": 0.9644681407740714,
+        "recall": 0.9637770709669577,
+        "f1score": 0.9637635921698287,
+        "fbeta": 0.9816072637303643,
+        "true_positive_rate": 0.9830635521970786,
+        "true_negative_rate": 0.9444905897368367,
+        "false_positive_rate": 0.05550941026316323,
+        "false_negative_rate": 0.016936447802921334,
+        "hash": "2f721403e4a0c78279213f7c0688fa8c1f40f59ac2404ab4b0fe62fd29315a0b"
+    }
+}

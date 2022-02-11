@@ -57,7 +57,7 @@ CURRENT_BLOCK_NUMBER = 0
 QUERY_SERVED = 0
 
 
-INCREMENT_COUNTER = 0.01
+BASE_PRICE = 0.1
 
 
 BLOCKCHAIN = Blockchain()
@@ -72,16 +72,6 @@ def updatehash(*args):
     h.update(hashing_text.encode('utf-8'))
     return h.hexdigest()
 
-def calculateIncentive(recall, fbeta, fnr):
-    global INCREMENT_COUNTER
-    global BEST_RECALL
-    global BEST_FBETA
-    global BEST_FNR
-
-    incentive = INCREMENT_COUNTER * ((  ((BEST_RECALL - recall)**2) *  ((BEST_FBETA - fbeta)**2)  )/  ((BEST_FNR - fnr)**2) )
-    INCREMENT_COUNTER += 0.02
-    
-    return incentive
     
 
 
@@ -144,6 +134,9 @@ def initialTraining():
     if request.method == 'POST':
         if model_no == 0:
             text = 'True'
+
+            start_time = time.time()
+
             trainFile = request.files['trainFile']
             testFile = request.files['testFile'] 
             
@@ -233,13 +226,15 @@ def initialTraining():
             CURRENT_BLOCK_NUMBER = CURRENT_BLOCK_NUMBER + 1
             
 
-            BLOCKCHAIN.mine(Block(data, CURRENT_BLOCK_NUMBER))
+            # BLOCKCHAIN.mine(Block(data, CURRENT_BLOCK_NUMBER))
 
             pickle.dump(perceptron_model_resampled, open(MODEL_DIR + 'model' + str(model_no + 1) + '.pkl', 'wb'))
 
             with open(METRIC_DIR +  str(model_no + 1), 'w') as f:
                 json.dump(data, f, indent=4, ensure_ascii=False)
                 f.write('\n')
+            
+            print("--- %s seconds ---" % (time.time() - start_time))
 
 
         else:
@@ -337,7 +332,8 @@ def train():
         global CURRENT_MODEL_HASH
         global BLOCKCHAIN
         global CURRENT_BLOCK_NUMBER
-        
+        global BASE_PRICE
+   
 
         if recall >= BEST_RECALL or fbeta >= BEST_FBETA or fnr <= BEST_FNR:
             pickle.dump(perceptron_model_resampled, open(MODEL_DIR + 'model' + str(model_no + 1) + '.pkl', 'wb'))
@@ -347,7 +343,9 @@ def train():
             
             BLOCKCHAIN.mine(Block(data, CURRENT_BLOCK_NUMBER))
            
-
+            incentive = BASE_PRICE * ((BEST_RECALL - recall)**2) +  ((BEST_FBETA - fbeta)**2) +  ((BEST_FNR - fnr)) 
+            BASE_PRICE += 0.02
+            print(incentive)
 
             if recall >= BEST_RECALL:
                 BEST_RECALL = recall
@@ -356,9 +354,40 @@ def train():
             elif fnr <= BEST_FNR:
                 BEST_FNR = fnr
 
-            incentive = calculateIncentive(recall, fbeta, fnr)
+
+
+            users = sorted(os.listdir(USER_DIR), key=lambda x : int(x))
+
+            index = 0
+            for user in users[0:]:
+                with open(USER_DIR + user, 'r') as f:
+                    user = json.load(f)
+                    if (user.get('hash') == g.user):
+                        current_name = user.get('name')
+                        current_pass1 = user.get('pass1')
+                        current_pass2 = user.get('pass2')
+                        current_hash = user.get('hash')
+                        current_role = user.get('role')
+                        current_balance = user.get('balance')
+                        
+                        new_balance = current_balance + incentive
+
+                        new_user_data = {
+                            'name' : current_name,
+                            'pass1' : current_pass1,
+                            'pass2' : current_pass2,
+                            'hash' : current_hash,
+                            'role' : current_role,
+                            'balance' : new_balance
+                        }
+                        
+                        with open(USER_DIR +  str(index), 'w') as f:
+                            json.dump(new_user_data, f, indent=4, ensure_ascii=False)
+                            f.write('\n')
+                index += 1
+            
         
-        print("--- %s seconds ---" % (time.time() - start_time))
+            print("--- %s seconds ---" % (time.time() - start_time))
        
     
                 
