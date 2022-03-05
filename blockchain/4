@@ -1,20 +1,20 @@
 {
     "block_no": 4,
-    "block_hash": "00000adc09d038f0bb46b734b666bd5f8c1e4aac4dc40b09df66a2e5fa262192",
-    "previous_hash": "0000026867b9b267ea06660541d05145695e02385f32b4010d24570e9e1d7e6e",
-    "nonce": 15159,
+    "block_hash": "0000000a7da0bb1d7167aaa0cdc2860a30498106995b945e677c6077ff9da22f",
+    "previous_hash": "000007f2a67c8f2750c3202a2c04dfd2e83f77d6b151404fc248d2c3f732d84f",
+    "nonce": 3540722,
     "data": {
-        "taining_accuracy": 0.8808235587721488,
-        "testing_accuracy": 0.8780875767461652,
-        "overall_accuracy": 0.8780875767461652,
-        "precision": 0.8960177313391909,
-        "recall": 0.8780875767461652,
-        "f1score": 0.8766918474244099,
-        "fbeta": 0.9764870399272743,
-        "true_positive_rate": 0.984478531336751,
-        "true_negative_rate": 0.7716966221555794,
-        "false_positive_rate": 0.2283033778444206,
-        "false_negative_rate": 0.015521468663248971,
-        "hash": "f26bbb4f90e092215374597650ad016ab1be5f96c32a0d977ebd72de2f96c202"
+        "taining_accuracy": 0.9684880239520958,
+        "testing_accuracy": 0.9554744525547445,
+        "overall_accuracy": 0.9554744525547445,
+        "precision": 0.9555065484261438,
+        "recall": 0.9554744525547445,
+        "f1score": 0.9554736682019047,
+        "fbeta": 0.951584593566143,
+        "true_positive_rate": 0.9512773722627738,
+        "true_negative_rate": 0.9596715328467154,
+        "false_positive_rate": 0.04032846715328467,
+        "false_negative_rate": 0.028622262773722628,
+        "hash": "83733fb69b7d875b3e5a8abba61a6434b898638b491d6c5f2a932bec77a7db95"
     }
 }

@@ -57,11 +57,13 @@ class Blockchain:
             'data' : block.data,
         }
 
+        self.chain.append(block)
+
         with open(BLOCKCHAIN_DIR +  str(block.number), 'w') as f:
             json.dump(block_data, f, indent=4, ensure_ascii=False)
             f.write('\n')
 
-        self.chain.append(block)
+        
 
 
     def remove(self, block):

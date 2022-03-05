@@ -1,0 +1,14 @@
+{
+    "taining_accuracy": 0.9608310699544473,
+    "testing_accuracy": 0.9586934804326108,
+    "overall_accuracy": 0.9586934804326108,
+    "precision": 0.9589888079829302,
+    "recall": 0.9586934804326108,
+    "f1score": 0.9586868348915676,
+    "fbeta": 0.9704296858049808,
+    "true_positive_rate": 0.9713764496373192,
+    "true_negative_rate": 0.9460105112279026,
+    "false_positive_rate": 0.053989488772097464,
+    "false_negative_rate": 0.028623550362680796,
+    "hash": "8a2d27becd26df4d8e6c9678a44dc45b17fe4ce3ba6520f50597d64f4ffb9848"
+}

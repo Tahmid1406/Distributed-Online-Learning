@@ -28,6 +28,7 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import io
 import time
+from matplotlib.ticker import StrMethodFormatter
 
 
 app = Flask(__name__)
@@ -54,10 +55,10 @@ BEST_FNR = 0
 CURRENT_BEST_MODEL = "model1.pkl"
 CURRENT_MODEL_HASH = None
 CURRENT_BLOCK_NUMBER = 0
-QUERY_SERVED = 0
+QUERY_SERVED = 200
 
 
-BASE_PRICE = 0.1
+BASE_PRICE = 0.001
 
 
 BLOCKCHAIN = Blockchain()
@@ -226,7 +227,7 @@ def initialTraining():
             CURRENT_BLOCK_NUMBER = CURRENT_BLOCK_NUMBER + 1
             
 
-            # BLOCKCHAIN.mine(Block(data, CURRENT_BLOCK_NUMBER))
+            BLOCKCHAIN.mine(Block(data, CURRENT_BLOCK_NUMBER))
 
             pickle.dump(perceptron_model_resampled, open(MODEL_DIR + 'model' + str(model_no + 1) + '.pkl', 'wb'))
 
@@ -345,7 +346,7 @@ def train():
            
             incentive = BASE_PRICE * ((BEST_RECALL - recall)**2) +  ((BEST_FBETA - fbeta)**2) +  ((BEST_FNR - fnr)) 
             BASE_PRICE += 0.02
-            print(incentive)
+            # print(incentive)
 
             if recall >= BEST_RECALL:
                 BEST_RECALL = recall
@@ -507,7 +508,9 @@ def view_analysis():
     files = sorted(os.listdir(BLOCKCHAIN_DIR), key=lambda x : int(x))
     counter = 1
     counter_array = []
-    acc_array = []
+    train_acc_array = []
+    test_acc_array = []
+    precision_array = []
     recall_array = []
     fbeta_array = []
     fnr_array = []
@@ -516,40 +519,61 @@ def view_analysis():
         with open(BLOCKCHAIN_DIR + str(counter)) as f:
             file = json.load(f)
             block_no = file.get('block_no')
+            train_acc = file.get('data')['taining_accuracy']
             test_acc = file.get('data')['testing_accuracy']
+            prec = file.get('data')['precision']
             rec = file.get('data')['recall']
             fbet = file.get('data')['fbeta']
             fnr = file.get('data')['false_negative_rate']
 
             counter_array.append(counter)
             counter += 1
-            acc_array.append(test_acc)
+            train_acc_array.append(train_acc)
+            test_acc_array.append(test_acc)
+            precision_array.append(prec)
             recall_array.append(rec)
             fbeta_array.append(fbet)
             fnr_array.append(fnr)
 
-    fig, axs = plt.subplots(2,1,figsize=(16,9), gridspec_kw={'height_ratios': [1, 2]})
-    plt.subplot(2,2,1)
-    graph = sns.lineplot(x=counter_array, y=acc_array, label="Test Accuracy Over Increments",marker="o")
-    graph.set_xlabel("ML Model Increment Number", fontsize = 16)
-    graph.set_ylabel("Test Accuracy Increment", fontsize = 16)
+    fig, ax = plt.subplots(2,1,figsize=(16,9), gridspec_kw={'height_ratios': [1, 2]})
 
-    plt.subplot(2,2,2)
+    plt.subplot(2,3,1)
+    graph = sns.lineplot(x=counter_array, y=train_acc_array, label="Training Accuracy Over Increments",marker="s")
+    graph.set_xlabel("ML Model Increment Number", fontsize = 16)
+    graph.set_ylabel("Training Accuracy", fontsize = 16)
+
+
+    plt.subplot(2,3,2)
+    graph = sns.lineplot(x=counter_array, y=test_acc_array, label="Test Accuracy Over Increments",marker="s")
+    graph.set_xlabel("ML Model Increment Number", fontsize = 16)
+    graph.set_ylabel("Test Accuracy", fontsize = 16)
+
+
+    plt.subplot(2,3,3)
+    graph = sns.lineplot(x=counter_array, y=precision_array, label="Precision Over Increments",marker="s")
+    graph.set_xlabel("ML Model Increment Number", fontsize = 16)
+    graph.set_ylabel("Precision Score", fontsize = 16)
+
+
+    plt.subplot(2,3,4)
     graph = sns.lineplot(x=counter_array, y=recall_array, label="Recall Over Increments",marker="s")
     graph.set_xlabel("ML Model Increment Number", fontsize = 16)
-    graph.set_ylabel("Recall Update", fontsize = 16)
+    graph.set_ylabel("Recall Score", fontsize = 16)
    
 
-    plt.subplot(2,2,3)
-    graph = sns.lineplot(x=counter_array, y=fbeta_array, label="F-Beta over Increments", marker="X")
+    plt.subplot(2,3,5)
+    graph = sns.lineplot(x=counter_array, y=fbeta_array, label="F-Beta over Increments", marker="s")
     graph.set_xlabel("ML Model Increment Number", fontsize = 16)
-    graph.set_ylabel("F-Beta Update", fontsize = 16)
+    graph.set_ylabel("F-Beta Score", fontsize = 16)
    
 
-    plt.subplot(2,2,4)
-    graph = sns.lineplot(x=counter_array, y=fnr_array, label="FNR over Increments", marker="o")
+    plt.subplot(2,3,6)
+    graph = sns.lineplot(x=counter_array, y=fnr_array, label="FNR over Increments", marker="s")
     graph.set_xlabel("ML Model Increment Number", fontsize = 16)
-    graph.set_ylabel("FNR Update", fontsize = 16)
+    graph.set_ylabel("False Negative Rate", fontsize = 16)
+
+    plt.tight_layout()
+    plt.gca().yaxis.set_major_formatter(StrMethodFormatter('{x:,.2f}'))
     plt.savefig('static/1.png', bbox_inches="tight")
 
     return render_template('analysis.html') 
